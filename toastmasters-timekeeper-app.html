@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<!--
+MIT License
+
+Copyright (c) 2024 Simon Slater
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+-->
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toastmasters Timekeeper</title>
+</head>
+<style>
+    .center-all {
+        display: flex;
+        justify-content: center;
+    }
+
+    .control {
+        font-family:Arial, Helvetica, sans-serif;
+        font-size:0.75rem;
+        padding:0.21rem;
+        padding-left: 0rem;
+        padding-right: 0rem;
+        margin: 0;
+        margin-top : 1rem;
+        display: flex;
+        justify-content: center;
+        z-index: 0;
+    }
+
+    label input[type="radio"] {
+        vertical-align: text-bottom;
+        margin: 0;
+        margin-right: -0.1rem;
+        padding:0 ;
+    }
+    .radio {
+        vertical-align: text-bottom;
+        margin-left: 0.35rem;
+        margin-right: 0.35rem;
+    }
+
+    table {
+        border-spacing: 0;
+        border-collapse: collapse;
+    }
+    td {
+        font-family:Arial, Helvetica, sans-serif;
+        font-size: 1rem;
+        text-align: center;
+        padding-left:  1rem;
+        padding-right: 1rem;
+
+        border-style: solid;
+        border-width: 10;
+        border-color: black;
+    }
+    .time_headers {
+        font-weight: bold;
+    }
+
+
+</style>
+<body>
+    <p id="header"             style="font-family:Arial, Helvetica, sans-serif;       font-size:2rem; padding:0rem; margin: 0rem;" align="center" >Table Topics</p>
+    <b><p id="countdown_timer" style="font-family: 'Courier New', Courier, monospace; font-size:8rem; padding:0rem; margin: 0rem;" align="center" >0:00</p></b>
+    <p id="total_time"         style="font-family:Arial, Helvetica, sans-serif;       font-size:2rem; padding:0rem; margin: 0rem; margin-bottom: 1rem;" align="center" >Total time:</p>
+
+    <div class="center-all" >
+        <button id="timer_button" style="font-size:1.5rem;">Start</button>
+    </div>
+    <div class="center-all" >
+        <div class="control" id="control">
+            <label class="radio">
+                <input type="radio" name="foobar" id="radio_table_topics" checked />
+                Table Topics
+            </label>
+            <label class="radio">
+                <input type="radio" name="foobar" id="radio_icebreaker" />
+                Icebreaker
+            </label>
+            <label class="radio">
+                <input type="radio" name="foobar" id="radio_speech" />
+                Speech
+            </label>
+            <label class="radio">
+                <input type="radio" name="foobar" id="radio_evaluation" />
+                Evaluation
+            </label>
+            <label class="radio">
+                <input type="radio" name="foobar" id="radio_demo_mode" />
+                Demo mode
+            </label>
+        </div>
+    </div>
+
+    <div class="center-all" >
+        <table id="table_of_times">
+            <tr class="time_headers">
+                <b>
+                <td id="green_time_header">Green</td>
+                <td id="amber_time_header">Amber</td>
+                <td id="red_time_header"  >Red</td>
+                </b>
+            </tr>
+            <tr>
+                <td id="green_time"></td>
+                <td id="amber_time"></td>
+                <td id="red_time"  ></td>
+            </tr>
+        </table>
+    </div>
+    <div class="center-all" >
+        <p id="list_of_times" style="font-family:Arial, Helvetica, sans-serif; font-size:1rem;" align="right" ></p>
+    </div>
+
+    <script>
+        const TABLE_TOPICS_GREEN_CARD = 1   * 1000 * 60;
+        const TABLE_TOPICS_AMBER_CARD = 1.5 * 1000 * 60;
+        const TABLE_TOPICS_RED_CARD   = 2   * 1000 * 60;
+
+        const DEMO_MODE_GREEN_CARD = 10000;
+        const DEMO_MODE_AMBER_CARD = 20000;
+        const DEMO_MODE_RED_CARD   = 30000;
+
+        const ICEBREAKER_GREEN_CARD = 4 * 1000 * 60;
+        const ICEBREAKER_AMBER_CARD = 5 * 1000 * 60;
+        const ICEBREAKER_RED_CARD   = 6 * 1000 * 60;
+
+        const SPEECH_GREEN_CARD = 5 * 1000 * 60;
+        const SPEECH_AMBER_CARD = 6 * 1000 * 60;
+        const SPEECH_RED_CARD   = 7 * 1000 * 60;
+
+        const EVALUATION_GREEN_CARD = 2   * 1000 * 60;
+        const EVALUATION_AMBER_CARD = 2.5 * 1000 * 60;
+        const EVALUATION_RED_CARD   = 3   * 1000 * 60;
+
+        const FPS = 30;
+
+        //const RED_CARD_FLASHING = "#bb0000";
+        //const GREEN_CARD_COLOR = "#00ff00";
+        //const AMBER_CARD_COLOR = "#ffaa00";
+        //const RED_CARD_COLOR   = "#ff0000";
+        //const IDLE_BACKGROUND_COLOR = "#ebbbff";
+        //const BLANK_BACKGROUND_COLOR = "#ebebeb";
+
+        const GREEN_CARD_COLOR          = [   0, 255, 0 ];
+        const AMBER_CARD_COLOR          = [ 255, 170, 0 ];
+        const RED_CARD_COLOR            = [ 255,   0, 0 ];
+        
+        const RED_CARD_FLASHING         = [  95,   0, 0 ];
+
+        const IDLE_BACKGROUND_COLOR     = [ 235, 187, 255 ];
+        const BLANK_BACKGROUND_COLOR    = [ 235, 235, 235 ];
+        const TIMER_FONT_IDLE_COLOR     = [   0,   0,   0 ];
+        const TIMER_FONT_ACTIVE_COLOR   = [   0,   0,   0 ];
+        const TIMER_FONT_FLASHING_COLOR = [ 235, 235, 235 ];
+
+        const COLOR_TRANSITION_IN_MILLIS          =  1000;
+        const DEMO_COLOR_TRANSITION_IN_MILLIS     =  5000;
+        const FLASHING_COLOR_TRANSITION_IN_MILLIS =  1000;
+        const START_FLASHING_AFTER_X_MILLIS       = 30000;
+
+        var is_timer_running = false;
+
+        var all_timings = [];
+
+
+        //------------//
+        // Page Setup //
+        //------------//
+        document.getElementById("countdown_timer").style.color = rgb_array_to_string( TIMER_FONT_IDLE_COLOR );
+        document.getElementById("total_time").style.color = rgb_array_to_string( TIMER_FONT_IDLE_COLOR );
+        document.body.style.backgroundColor = rgb_array_to_string( IDLE_BACKGROUND_COLOR );
+
+        document.getElementById('header').textContent = "Table Topics";
+        document.getElementById('green_time').textContent = milliseconds_to_time_str( TABLE_TOPICS_GREEN_CARD );
+        document.getElementById('amber_time').textContent = milliseconds_to_time_str( TABLE_TOPICS_AMBER_CARD );
+        document.getElementById('red_time'  ).textContent = milliseconds_to_time_str( TABLE_TOPICS_RED_CARD   );
+
+        document.getElementById('green_time_header').style.backgroundColor = rgb_array_to_string( GREEN_CARD_COLOR );
+        document.getElementById('amber_time_header').style.backgroundColor = rgb_array_to_string( AMBER_CARD_COLOR );
+        document.getElementById('red_time_header'  ).style.backgroundColor = rgb_array_to_string( RED_CARD_COLOR   );
+
+        //-----------//
+        // Functions //
+        //-----------//
+        document.getElementById("timer_button").onclick = function() {
+            start_or_stop_timer();
+        };
+
+        document.getElementById("radio_table_topics").onclick = function() {
+            document.getElementById('header').textContent = "Table Topics";
+            document.getElementById('green_time').textContent = milliseconds_to_time_str( TABLE_TOPICS_GREEN_CARD );
+            document.getElementById('amber_time').textContent = milliseconds_to_time_str( TABLE_TOPICS_AMBER_CARD );
+            document.getElementById('red_time').textContent   = milliseconds_to_time_str( TABLE_TOPICS_RED_CARD );
+        }
+
+        document.getElementById("radio_icebreaker").onclick = function() {
+            document.getElementById('header').textContent = "Icebreaker";
+            document.getElementById('green_time').textContent = milliseconds_to_time_str( ICEBREAKER_GREEN_CARD );
+            document.getElementById('amber_time').textContent = milliseconds_to_time_str( ICEBREAKER_AMBER_CARD );
+            document.getElementById('red_time').textContent   = milliseconds_to_time_str( ICEBREAKER_RED_CARD );
+        }
+
+        document.getElementById("radio_speech").onclick = function() {
+            document.getElementById('header').textContent = "Speech";
+            document.getElementById('green_time').textContent = milliseconds_to_time_str( SPEECH_GREEN_CARD );
+            document.getElementById('amber_time').textContent = milliseconds_to_time_str( SPEECH_AMBER_CARD );
+            document.getElementById('red_time').textContent   = milliseconds_to_time_str( SPEECH_RED_CARD );
+        }
+
+        document.getElementById("radio_evaluation").onclick = function() {
+            document.getElementById('header').textContent = "Evaluation";
+            document.getElementById('green_time').textContent = milliseconds_to_time_str( EVALUATION_GREEN_CARD, true );
+            document.getElementById('amber_time').textContent = milliseconds_to_time_str( EVALUATION_AMBER_CARD, true );
+            document.getElementById('red_time').textContent   = milliseconds_to_time_str( EVALUATION_RED_CARD  , true );
+        }
+
+        document.getElementById("radio_demo_mode").onclick = function() {
+            document.getElementById('header').textContent = "Demo Mode";
+            document.getElementById('green_time').textContent = milliseconds_to_time_str( DEMO_MODE_GREEN_CARD, true );
+            document.getElementById('amber_time').textContent = milliseconds_to_time_str( DEMO_MODE_AMBER_CARD, true );
+            document.getElementById('red_time').textContent   = milliseconds_to_time_str( DEMO_MODE_RED_CARD  , true );
+        }
+
+        function after_timer_stop() {
+            console.log("after");
+            document.getElementById("countdown_timer").textContent = "0:00";
+            document.getElementById("countdown_timer").style.color = rgb_array_to_string( TIMER_FONT_IDLE_COLOR );
+
+            document.getElementById("total_time").style.color = rgb_array_to_string( TIMER_FONT_IDLE_COLOR );
+            document.body.style.backgroundColor = rgb_array_to_string( IDLE_BACKGROUND_COLOR );
+
+            document.getElementById("timer_button").innerText = "Start";
+
+            document.getElementById("radio_table_topics").disabled = false;
+            document.getElementById("radio_icebreaker").disabled   = false;
+            document.getElementById("radio_speech").disabled       = false;
+            document.getElementById("radio_evaluation").disabled   = false;
+            document.getElementById("radio_demo_mode").disabled    = false;
+
+            // Show the radio dials group.
+            document.getElementById("control").style.opacity        = 1;
+            document.getElementById("table_of_times").style.opacity = 1;
+            document.getElementById("list_of_times").style.opacity  = 1;
+        }
+
+        function before_timer_start() {
+            document.getElementById("timer_button").innerText = "Stop";
+            document.getElementById("total_time").style.color = rgb_array_to_string( TIMER_FONT_ACTIVE_COLOR );
+            
+            document.getElementById("radio_table_topics").disabled = true;
+            document.getElementById("radio_icebreaker").disabled   = true;
+            document.getElementById("radio_speech").disabled       = true;
+            document.getElementById("radio_evaluation").disabled   = true;
+            document.getElementById("radio_demo_mode").disabled    = true;
+
+            // Hide the radio dials group.
+            document.getElementById("control").style.opacity        = 0;
+            document.getElementById("table_of_times").style.opacity = 0;
+            document.getElementById("list_of_times").style.opacity  = 0;
+        }
+
+        function color_fade_to( start_colour, end_colour, percent ) {
+            result_r = (1 - percent ) * start_colour[0] + percent * end_colour[0]
+            result_g = (1 - percent ) * start_colour[1] + percent * end_colour[1]
+            result_b = (1 - percent ) * start_colour[2] + percent * end_colour[2]
+
+            return [result_r, result_g, result_b ];
+        }
+
+        function rgb_array_to_string( rgb ) {
+            return "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")"
+        }
+
+        function get_difference_in_time_as_percentage( end_time, current_time, transition_time) {
+            end_time        = Math.abs( end_time );
+            current_time    = Math.abs( current_time );
+            transition_time = Math.abs( transition_time );
+            if( current_time > end_time ) {
+                return 1;
+            }
+            else if( current_time >= (end_time - transition_time ) ) {
+                var delta = Math.abs(end_time - current_time);
+                var result = 1 - (delta / transition_time );
+
+                return result;
+            }
+            else {
+                return 0;
+            }
+        }
+
+        async function start_or_stop_timer() {
+            var green_card = 0;
+            var amber_card = 0;
+            var red_card   = 0;
+
+            var is_demo_mode = false;
+            var current_selection_as_str = "";
+
+            if( is_timer_running ) {
+                is_timer_running = false;
+                return;
+            } else {
+                is_timer_running = true;
+
+                //// Scroll to the top of the screen after pressing the start button.
+                //const document_width = document.documentElement.scrollWidth;
+                //const window_width = window.innerWidth;
+
+                //// Calculate the X coordinate to scroll to (center of the page)
+                //const scroll_x = (document_width - window_width) / 2;
+
+                //// Scroll to the calculated X position
+                //window.scrollTo(100, 100);
+                ////window.scrollTo({
+                ////    top: 0,
+                ////    left: scroll_x,
+                ////    behavior: 'smooth'
+                ////});
+            }
+
+            before_timer_start();
+
+            radio_id = document.querySelector('input[name="foobar"]:checked').id;
+            if( radio_id == "radio_demo_mode" ) {
+                green_card = DEMO_MODE_GREEN_CARD;
+                amber_card = DEMO_MODE_AMBER_CARD;
+                red_card   = DEMO_MODE_RED_CARD;
+                is_demo_mode = true;
+                current_selection_as_str = "Demo Mode";
+            }
+            else if( radio_id == "radio_table_topics" ) {
+                green_card = TABLE_TOPICS_GREEN_CARD;
+                amber_card = TABLE_TOPICS_AMBER_CARD;
+                red_card   = TABLE_TOPICS_RED_CARD;
+                current_selection_as_str = "Table Topics";
+            }
+            else if( radio_id == "radio_icebreaker" ) {
+                green_card = ICEBREAKER_GREEN_CARD;
+                amber_card = ICEBREAKER_AMBER_CARD;
+                red_card   = ICEBREAKER_RED_CARD;
+                current_selection_as_str = "Icebreaker";
+            }
+            else if( radio_id == "radio_speech" ) {
+                green_card = SPEECH_GREEN_CARD;
+                amber_card = SPEECH_AMBER_CARD;
+                red_card   = SPEECH_RED_CARD;
+                current_selection_as_str = "Speech";
+            }
+            else if( radio_id == "radio_evaluation" ) {
+                green_card = EVALUATION_GREEN_CARD;
+                amber_card = EVALUATION_AMBER_CARD;
+                red_card   = EVALUATION_RED_CARD;
+                current_selection_as_str = "Evaluation";
+            }
+            else {
+                console.log("No option selected. This should never happen.")
+            }
+
+
+            start_time = Date.now();
+            var last_flashing_card_time = 0;
+            var is_flashing_background_on = false;
+            var time_delta = 0;
+            while( is_timer_running ) {
+                var current_time = Date.now();
+                if( is_demo_mode == true ) {
+                    time_delta += 300;
+                    if( time_delta > red_card + START_FLASHING_AFTER_X_MILLIS ) {
+                        // Stops the screen flashing too fast when we get into flashing mode.
+                        is_demo_mode = false;
+                        start_time = Date.now() - time_delta;
+                    }
+                } else {
+                    time_delta = current_time - start_time;
+                }
+
+                var time_str = milliseconds_to_time_str( time_delta, false );
+                var countdown = red_card - time_delta + 1000; // add 1000 milliseconds, because the maths in milliseconds_to_time_str() rounds, which gives us an off by 1 error(one second).
+                //var countdown_str = milliseconds_to_time_str( countdown );
+                var countdown_str = milliseconds_to_time_str( countdown, false );
+                //document.getElementById('countdown_timer').textContent = JSON.stringify("countup: " + time_str + " countdown: " + countdown_str );
+                document.getElementById('countdown_timer').textContent = countdown_str;
+                document.getElementById('total_time').textContent = "Total time: " + time_str;
+
+
+                //if( countdown > (red_card - green_card) ) {
+                if( countdown > amber_card ) {
+                    // Blank card to green card
+                    var percentage = get_difference_in_time_as_percentage( countdown, amber_card, COLOR_TRANSITION_IN_MILLIS )
+                    var background_rgb = color_fade_to( BLANK_BACKGROUND_COLOR, GREEN_CARD_COLOR, percentage );
+                    document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
+                } else if( countdown > green_card ) {
+                    // Green card to amber card
+                    var percentage = get_difference_in_time_as_percentage( countdown, green_card, COLOR_TRANSITION_IN_MILLIS )
+                    var background_rgb = color_fade_to( GREEN_CARD_COLOR, AMBER_CARD_COLOR, percentage );
+                    document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
+                } else if ( countdown > 0 ) {
+                    // Amber card to red card
+                    var percentage = get_difference_in_time_as_percentage( countdown, 0, COLOR_TRANSITION_IN_MILLIS )
+                    var background_rgb = color_fade_to( AMBER_CARD_COLOR, RED_CARD_COLOR, percentage );
+                    document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
+                } else if ( countdown > -START_FLASHING_AFTER_X_MILLIS ) {
+                    // Red card
+                    document.body.style.backgroundColor = rgb_array_to_string( RED_CARD_COLOR );
+                    document.getElementById("countdown_timer").style.color = rgb_array_to_string( TIMER_FONT_ACTIVE_COLOR );
+                } else {
+                    // Flashing red card
+                    if( countdown < (last_flashing_card_time-FLASHING_COLOR_TRANSITION_IN_MILLIS) ) {
+                        is_flashing_background_on = ! is_flashing_background_on;
+                        last_flashing_card_time = countdown;
+                    }
+
+                    if( is_flashing_background_on ) {
+                        var percentage = get_difference_in_time_as_percentage( last_flashing_card_time-FLASHING_COLOR_TRANSITION_IN_MILLIS, countdown, FLASHING_COLOR_TRANSITION_IN_MILLIS )
+                        var background_rgb = color_fade_to( RED_CARD_COLOR, RED_CARD_FLASHING, percentage );
+                        var font_rgb = color_fade_to( TIMER_FONT_ACTIVE_COLOR, TIMER_FONT_FLASHING_COLOR, percentage );
+                        document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
+                        document.getElementById("countdown_timer").style.color = rgb_array_to_string( font_rgb );
+                        document.getElementById("total_time").style.color = rgb_array_to_string( font_rgb );
+                    } else {
+                        var percentage = get_difference_in_time_as_percentage( last_flashing_card_time-FLASHING_COLOR_TRANSITION_IN_MILLIS, countdown, FLASHING_COLOR_TRANSITION_IN_MILLIS )
+                        var background_rgb = color_fade_to( RED_CARD_FLASHING, RED_CARD_COLOR, percentage );
+                        var font_rgb = color_fade_to( TIMER_FONT_FLASHING_COLOR, TIMER_FONT_ACTIVE_COLOR, percentage );
+                        document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
+                        document.getElementById("countdown_timer").style.color = rgb_array_to_string( font_rgb );
+                        document.getElementById("total_time").style.color = rgb_array_to_string( font_rgb );
+                    }
+                }
+
+                // sleep one liner - an easy way to do FPS.
+                await new Promise(r => setTimeout(r, 1000 / FPS));
+            }
+            all_timings = all_timings.concat( current_selection_as_str + ": " + milliseconds_to_time_str( time_delta, true ) );
+            update_displayed_timings();
+            after_timer_stop();
+        }
+
+        function update_displayed_timings() {
+            var str_timings = "";
+            for( let i = 0; i < all_timings.length; i++ ) {
+                str_timings += all_timings[i] + "<br>";
+            }
+
+            document.getElementById('list_of_times').innerHTML = str_timings;
+        }
+
+        //function convert_millis_to_seconds( time_in_millis_1, time_in_millis_2 ) {
+        //    var seconds = 0;
+        //    if( time_in_millis_1 > 0 ) {
+        //        var seconds = Math.floor(time_in_millis_1 / 1000);
+        //        console.log("Time in seconds: " + seconds );
+        //    } else {
+        //        var seconds = Math.ceil(time_in_millis_1 / 1000);
+        //        console.log("Time in seconds: " + seconds );
+        //    }
+
+        //    return seconds;
+        //}
+        //
+        //function areTimesTheSameLengthInSeconds( time_in_millis_1, time_in_millis_2 ) {
+        //    var t1 = 0;
+        //    var t2 = 0;
+        //    if( time_in_millis_1 > 0 ) {
+        //        // Change the milliseconds to 000, so that they mathch up
+        //        t1 = Math.floor(time_in_millis_1 / 1000);
+        //        t2 = Math.floor(time_in_millis_2 / 1000);
+        //    } else {
+        //        // Change the milliseconds to 000, so that they mathch up
+        //        t1 = Math.ceil(time_in_millis_1 / 1000);
+        //        t2 = Math.ceil(time_in_millis_2 / 1000);
+        //    }
+
+        //    return ( t1 == t2 )
+        //}
+
+        /**
+         * are_minutes_always_shown - if true, it will display minutes even when minutes are zero.
+         */
+        function milliseconds_to_time_str( millis, are_minutes_always_shown ) {
+            var seconds_str = "";
+            var minutes_str = "";
+
+            if( millis > 0 ) {
+                var minutes = Math.floor( millis / 1000 / 60 );
+                var seconds = Math.floor( millis / 1000 ) - (minutes * 60);
+                if( ( (seconds < 10) & (minutes > 0) ) | ( (seconds < 10) & are_minutes_always_shown) ) {
+                    seconds_str = "0" + seconds;
+                } else {
+                    seconds_str = "" + seconds;
+                }
+
+                if( minutes >= 1 | are_minutes_always_shown ) {
+                    minutes_str = minutes + ":";
+                } else {
+                    minutes_str = "";
+                }
+            } else {
+                // Negative time.
+
+                // Minus 1, to fix the off by 1 error. Without it, the program displays zero twice.
+                millis -= 1000;
+
+                // We use Math.ceil() to round up, because we are working with negative numbers.
+                // e.g. 
+                //     Math.floor( -0.1 ) = 1
+                //     Math.floor(  0.1 ) = 0
+                //     Math.ceil( -0.1 ) = 0
+                //     Math.ceil(  0.1 ) = 1
+
+                var minutes = Math.ceil( millis / 1000 / 60 );
+                var seconds = Math.ceil( millis / 1000 ) - (minutes * 60);
+                if( ( (seconds > -10) & (minutes < 0) ) | ( (seconds > -10) & are_minutes_always_shown) ) {
+                    seconds_str = "0" + (seconds * -1);
+                } else {
+                    seconds_str = "" + (seconds * -1);
+                }
+
+                if( minutes <= -1 | are_minutes_always_shown ) {
+                    minutes_str = minutes + ":";
+                } else {
+                    minutes_str = "-";
+                }
+            }
+
+            var time_str = minutes_str + seconds_str;
+            return time_str;
+        }
+    </script>
+</body>
+</html>
+
