@@ -244,7 +244,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         }
 
         function after_timer_stop() {
-            console.log("after");
             document.getElementById("countdown_timer").textContent = "0:00";
             document.getElementById("countdown_timer").style.color = rgb_array_to_string( TIMER_FONT_IDLE_COLOR );
 
@@ -293,15 +292,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             return "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")"
         }
 
-        function get_difference_in_time_as_percentage( end_time, current_time, transition_time) {
-            end_time        = Math.abs( end_time );
-            current_time    = Math.abs( current_time );
+        function get_difference_in_time_as_percentage( start_time, end_time, transition_time) {
+            end_time      = Math.abs( end_time );
+            start_time    = Math.abs( start_time );
             transition_time = Math.abs( transition_time );
-            if( current_time > end_time ) {
+
+            if( start_time > end_time ) {
+                // Programmer passed variables in wrong order, so return 1.
+                console.log("Warning: start_time is greater than end_time")
                 return 1;
             }
-            else if( current_time >= (end_time - transition_time ) ) {
-                var delta = Math.abs(end_time - current_time);
+            if( start_time >= (end_time - transition_time ) ) {
+                var delta = Math.abs(end_time - start_time);
                 var result = 1 - (delta / transition_time );
 
                 return result;
@@ -326,6 +328,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
                 is_timer_running = true;
 
                 //// Scroll to the top of the screen after pressing the start button.
+                // Commented out as it doesn't work on mobile but works on desktop :(.
                 //const document_width = document.documentElement.scrollWidth;
                 //const window_width = window.innerWidth;
 
@@ -399,55 +402,54 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 
                 var time_str = milliseconds_to_time_str( time_delta, false );
                 var countdown = red_card - time_delta + 1000; // add 1000 milliseconds, because the maths in milliseconds_to_time_str() rounds, which gives us an off by 1 error(one second).
-                //var countdown_str = milliseconds_to_time_str( countdown );
                 var countdown_str = milliseconds_to_time_str( countdown, false );
-                //document.getElementById('countdown_timer').textContent = JSON.stringify("countup: " + time_str + " countdown: " + countdown_str );
                 document.getElementById('countdown_timer').textContent = countdown_str;
                 document.getElementById('total_time').textContent = "Total time: " + time_str;
 
-
-                //if( countdown > (red_card - green_card) ) {
-                if( countdown > amber_card ) {
-                    // Blank card to green card
-                    var percentage = get_difference_in_time_as_percentage( countdown, amber_card, COLOR_TRANSITION_IN_MILLIS )
-                    var background_rgb = color_fade_to( BLANK_BACKGROUND_COLOR, GREEN_CARD_COLOR, percentage );
-                    document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
-                } else if( countdown > green_card ) {
-                    // Green card to amber card
-                    var percentage = get_difference_in_time_as_percentage( countdown, green_card, COLOR_TRANSITION_IN_MILLIS )
-                    var background_rgb = color_fade_to( GREEN_CARD_COLOR, AMBER_CARD_COLOR, percentage );
-                    document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
-                } else if ( countdown > 0 ) {
-                    // Amber card to red card
-                    var percentage = get_difference_in_time_as_percentage( countdown, 0, COLOR_TRANSITION_IN_MILLIS )
-                    var background_rgb = color_fade_to( AMBER_CARD_COLOR, RED_CARD_COLOR, percentage );
-                    document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
-                } else if ( countdown > -START_FLASHING_AFTER_X_MILLIS ) {
-                    // Red card
-                    document.body.style.backgroundColor = rgb_array_to_string( RED_CARD_COLOR );
-                    document.getElementById("countdown_timer").style.color = rgb_array_to_string( TIMER_FONT_ACTIVE_COLOR );
-                } else {
+                if( (time_delta >= (red_card + START_FLASHING_AFTER_X_MILLIS)) ) {
                     // Flashing red card
-                    if( countdown < (last_flashing_card_time-FLASHING_COLOR_TRANSITION_IN_MILLIS) ) {
+                    if( time_delta > (last_flashing_card_time + FLASHING_COLOR_TRANSITION_IN_MILLIS) ) {
                         is_flashing_background_on = ! is_flashing_background_on;
-                        last_flashing_card_time = countdown;
+                        last_flashing_card_time = time_delta;
                     }
 
                     if( is_flashing_background_on ) {
-                        var percentage = get_difference_in_time_as_percentage( last_flashing_card_time-FLASHING_COLOR_TRANSITION_IN_MILLIS, countdown, FLASHING_COLOR_TRANSITION_IN_MILLIS )
+                        var percentage = get_difference_in_time_as_percentage( time_delta, last_flashing_card_time + FLASHING_COLOR_TRANSITION_IN_MILLIS, FLASHING_COLOR_TRANSITION_IN_MILLIS )
                         var background_rgb = color_fade_to( RED_CARD_COLOR, RED_CARD_FLASHING, percentage );
                         var font_rgb = color_fade_to( TIMER_FONT_ACTIVE_COLOR, TIMER_FONT_FLASHING_COLOR, percentage );
+
                         document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
                         document.getElementById("countdown_timer").style.color = rgb_array_to_string( font_rgb );
                         document.getElementById("total_time").style.color = rgb_array_to_string( font_rgb );
                     } else {
-                        var percentage = get_difference_in_time_as_percentage( last_flashing_card_time-FLASHING_COLOR_TRANSITION_IN_MILLIS, countdown, FLASHING_COLOR_TRANSITION_IN_MILLIS )
+                        var percentage = get_difference_in_time_as_percentage( time_delta, last_flashing_card_time + FLASHING_COLOR_TRANSITION_IN_MILLIS, FLASHING_COLOR_TRANSITION_IN_MILLIS )
                         var background_rgb = color_fade_to( RED_CARD_FLASHING, RED_CARD_COLOR, percentage );
                         var font_rgb = color_fade_to( TIMER_FONT_FLASHING_COLOR, TIMER_FONT_ACTIVE_COLOR, percentage );
                         document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
                         document.getElementById("countdown_timer").style.color = rgb_array_to_string( font_rgb );
                         document.getElementById("total_time").style.color = rgb_array_to_string( font_rgb );
                     }
+                } else if( time_delta >= red_card ) {
+                    document.body.style.backgroundColor = rgb_array_to_string( RED_CARD_COLOR );
+                } else if( time_delta >= amber_card ) {
+                    // Amber card to red card
+                    var percentage = get_difference_in_time_as_percentage( time_delta, red_card, COLOR_TRANSITION_IN_MILLIS )
+                    var background_rgb = color_fade_to( AMBER_CARD_COLOR, RED_CARD_COLOR, percentage );
+                    document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
+                } else if( time_delta >= green_card ) {
+                        // Green card to amber card
+                        var percentage = get_difference_in_time_as_percentage( time_delta, amber_card, COLOR_TRANSITION_IN_MILLIS )
+                        var background_rgb = color_fade_to( GREEN_CARD_COLOR, AMBER_CARD_COLOR, percentage );
+                        document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
+                } else if ( time_delta >= 0) {
+                        // Blank card to green card
+                        var percentage = get_difference_in_time_as_percentage( time_delta, green_card, COLOR_TRANSITION_IN_MILLIS )
+                        var background_rgb = color_fade_to( BLANK_BACKGROUND_COLOR, GREEN_CARD_COLOR, percentage );
+                        document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
+                } else {
+
+                    console.log("should never reach this condition - time_delta could be negative?  time_delta: " + time_delta );
+                        document.body.style.backgroundColor = rgb_array_to_string( IDLE_BACKGROUND_COLOR );
                 }
 
                 // sleep one liner - an easy way to do FPS.
