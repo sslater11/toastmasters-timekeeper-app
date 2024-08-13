@@ -62,6 +62,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     table {
         border-spacing: 0;
         border-collapse: collapse;
+        margin-bottom: 1rem;
     }
     td {
         font-family:Arial, Helvetica, sans-serif;
@@ -74,7 +75,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         border-width: 10;
         border-color: black;
     }
-    .time_headers {
+    .table-headers {
         font-weight: bold;
     }
 
@@ -119,7 +120,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 
     <div class="center-all" >
         <table id="table_of_times">
-            <tr class="time_headers">
+            <tr class="table-headers">
                 <b>
                 <td id="green_time_header">Green</td>
                 <td id="amber_time_header">Amber</td>
@@ -134,7 +135,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         </table>
     </div>
     <div class="center-all" >
-        <p id="list_of_times" style="font-family:Arial, Helvetica, sans-serif; font-size:1rem;" align="right" ></p>
+        <div id="list_of_timings"></div>
     </div>
 
     <script>
@@ -275,9 +276,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             document.getElementById("radio_demo_mode").disabled         = false;
 
             // Show the radio dials group.
-            document.getElementById("control").style.opacity        = 1;
-            document.getElementById("table_of_times").style.opacity = 1;
-            document.getElementById("list_of_times").style.opacity  = 1;
+            document.getElementById("control").style.opacity         = 1;
+            document.getElementById("table_of_times").style.opacity  = 1;
+            document.getElementById("list_of_timings").style.opacity = 1;
         }
 
         function before_timer_start() {
@@ -292,9 +293,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             document.getElementById("radio_demo_mode").disabled         = true;
 
             // Hide the radio dials group.
-            document.getElementById("control").style.opacity        = 0;
-            document.getElementById("table_of_times").style.opacity = 0;
-            document.getElementById("list_of_times").style.opacity  = 0;
+            document.getElementById("control").style.opacity         = 0;
+            document.getElementById("table_of_times").style.opacity  = 0;
+            document.getElementById("list_of_timings").style.opacity = 0;
         }
 
         function color_fade_to( start_colour, end_colour, percent ) {
@@ -478,18 +479,60 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
                 // sleep one liner - an easy way to do FPS.
                 await new Promise(r => setTimeout(r, 1000 / FPS));
             }
-            all_timings = all_timings.concat( current_selection_as_str + ": " + milliseconds_to_time_str( time_delta, true ) );
-            update_displayed_timings();
+            all_timings = all_timings.concat( [[current_selection_as_str, milliseconds_to_time_str( time_delta, true ) ]] );
+            generate_timings_table();
             after_timer_stop();
         }
 
-        function update_displayed_timings() {
-            var str_timings = "";
-            for( let i = 0; i < all_timings.length; i++ ) {
-                str_timings += all_timings[i] + "<br>";
+        function generate_timings_table() {
+            // Remove any old tables from previous runs.
+            var table_div = document.getElementById('list_of_timings');
+            while( table_div.firstChild ) {
+                table_div.removeChild( table_div.firstChild );
             }
 
-            document.getElementById('list_of_times').innerHTML = str_timings;
+            // Create a new table.
+            var table = document.createElement('TABLE');
+            var table_body = document.createElement('TBODY');
+            table.appendChild(table_body);
+
+            // Add the headings to the table.
+            var heading_tr = document.createElement('TR');
+            heading_tr.className = "table-headers";
+            table_body.appendChild( heading_tr );
+
+            var heading_1 = document.createElement('TD');
+            var heading_2 = document.createElement('TD');
+            var heading_3 = document.createElement('TD');
+
+            heading_1.appendChild( document.createTextNode( "Index" ) );
+            heading_2.appendChild( document.createTextNode( "Speech Type" ) );
+            heading_3.appendChild( document.createTextNode( "Time" ) );
+
+            heading_tr.appendChild(heading_1);
+            heading_tr.appendChild(heading_2);
+            heading_tr.appendChild(heading_3);
+
+            // Add all timings to the table.
+            for (var i = 0; i < all_timings.length; i++) {
+                var tr = document.createElement('TR');
+                table_body.appendChild(tr);
+
+                var td_1 = document.createElement('TD');
+                var td_2 = document.createElement('TD');
+                var td_3 = document.createElement('TD');
+
+                td_1.appendChild( document.createTextNode("" + (i+1) ) );
+                td_2.appendChild( document.createTextNode( all_timings[i][0] ) );
+                td_3.appendChild( document.createTextNode( all_timings[i][1] ) );
+
+                tr.appendChild(td_1);
+                tr.appendChild(td_2);
+                tr.appendChild(td_3);
+            }
+
+            // Add table to our div tag.
+            table_div.appendChild( table );
         }
 
         //function convert_millis_to_seconds( time_in_millis_1, time_in_millis_2 ) {
