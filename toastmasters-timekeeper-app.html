@@ -91,23 +91,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     <div class="center-all" >
         <div class="control" id="control">
             <label class="radio">
-                <input type="radio" name="foobar" id="radio_table_topics" checked />
+                <input type="radio" name="my_timer_radio" id="radio_table_topics" checked />
                 Table Topics
             </label>
             <label class="radio">
-                <input type="radio" name="foobar" id="radio_icebreaker" />
+                <input type="radio" name="my_timer_radio" id="radio_icebreaker" />
                 Icebreaker
             </label>
             <label class="radio">
-                <input type="radio" name="foobar" id="radio_speech" />
+                <input type="radio" name="my_timer_radio" id="radio_speech" />
                 Speech
             </label>
             <label class="radio">
-                <input type="radio" name="foobar" id="radio_evaluation" />
+                <input type="radio" name="my_timer_radio" id="radio_evaluation" />
                 Evaluation
             </label>
             <label class="radio">
-                <input type="radio" name="foobar" id="radio_demo_mode" />
+                <input type="radio" name="my_timer_radio" id="radio_general_evaluator" />
+                General Evaluator
+            </label>
+            <label class="radio">
+                <input type="radio" name="my_timer_radio" id="radio_demo_mode" />
                 Demo mode
             </label>
         </div>
@@ -153,6 +157,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         const EVALUATION_GREEN_CARD = 2   * 1000 * 60;
         const EVALUATION_AMBER_CARD = 2.5 * 1000 * 60;
         const EVALUATION_RED_CARD   = 3   * 1000 * 60;
+
+        const GENERAL_EVALUATOR_GREEN_CARD = 3 * 1000 * 60;
+        const GENERAL_EVALUATOR_AMBER_CARD = 4 * 1000 * 60;
+        const GENERAL_EVALUATOR_RED_CARD   = 5 * 1000 * 60;
 
         const FPS = 30;
 
@@ -236,6 +244,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             document.getElementById('red_time').textContent   = milliseconds_to_time_str( EVALUATION_RED_CARD  , true );
         }
 
+        document.getElementById("radio_general_evaluator").onclick = function() {
+            document.getElementById('header').textContent = "General Evaluator";
+            document.getElementById('green_time').textContent = milliseconds_to_time_str( GENERAL_EVALUATOR_GREEN_CARD, true );
+            document.getElementById('amber_time').textContent = milliseconds_to_time_str( GENERAL_EVALUATOR_AMBER_CARD, true );
+            document.getElementById('red_time').textContent   = milliseconds_to_time_str( GENERAL_EVALUATOR_RED_CARD  , true );
+        }
+
         document.getElementById("radio_demo_mode").onclick = function() {
             document.getElementById('header').textContent = "Demo Mode";
             document.getElementById('green_time').textContent = milliseconds_to_time_str( DEMO_MODE_GREEN_CARD, true );
@@ -252,11 +267,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 
             document.getElementById("timer_button").innerText = "Start";
 
-            document.getElementById("radio_table_topics").disabled = false;
-            document.getElementById("radio_icebreaker").disabled   = false;
-            document.getElementById("radio_speech").disabled       = false;
-            document.getElementById("radio_evaluation").disabled   = false;
-            document.getElementById("radio_demo_mode").disabled    = false;
+            document.getElementById("radio_table_topics").disabled      = false;
+            document.getElementById("radio_icebreaker").disabled        = false;
+            document.getElementById("radio_speech").disabled            = false;
+            document.getElementById("radio_evaluation").disabled        = false;
+            document.getElementById("radio_general_evaluator").disabled = false;
+            document.getElementById("radio_demo_mode").disabled         = false;
 
             // Show the radio dials group.
             document.getElementById("control").style.opacity        = 1;
@@ -268,11 +284,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             document.getElementById("timer_button").innerText = "Stop";
             document.getElementById("total_time").style.color = rgb_array_to_string( TIMER_FONT_ACTIVE_COLOR );
             
-            document.getElementById("radio_table_topics").disabled = true;
-            document.getElementById("radio_icebreaker").disabled   = true;
-            document.getElementById("radio_speech").disabled       = true;
-            document.getElementById("radio_evaluation").disabled   = true;
-            document.getElementById("radio_demo_mode").disabled    = true;
+            document.getElementById("radio_table_topics").disabled      = true;
+            document.getElementById("radio_icebreaker").disabled        = true;
+            document.getElementById("radio_speech").disabled            = true;
+            document.getElementById("radio_evaluation").disabled        = true;
+            document.getElementById("radio_general_evaluator").disabled = true;
+            document.getElementById("radio_demo_mode").disabled         = true;
 
             // Hide the radio dials group.
             document.getElementById("control").style.opacity        = 0;
@@ -346,7 +363,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 
             before_timer_start();
 
-            radio_id = document.querySelector('input[name="foobar"]:checked').id;
+            radio_id = document.querySelector('input[name="my_timer_radio"]:checked').id;
             if( radio_id == "radio_demo_mode" ) {
                 green_card = DEMO_MODE_GREEN_CARD;
                 amber_card = DEMO_MODE_AMBER_CARD;
@@ -377,6 +394,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
                 amber_card = EVALUATION_AMBER_CARD;
                 red_card   = EVALUATION_RED_CARD;
                 current_selection_as_str = "Evaluation";
+            }
+            else if( radio_id == "radio_general_evaluator" ) {
+                green_card = GENERAL_EVALUATOR_GREEN_CARD;
+                amber_card = GENERAL_EVALUATOR_AMBER_CARD;
+                red_card   = GENERAL_EVALUATOR_RED_CARD;
+                current_selection_as_str = "General Evaluator";
             }
             else {
                 console.log("No option selected. This should never happen.")
