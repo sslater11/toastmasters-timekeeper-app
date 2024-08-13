@@ -34,14 +34,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         justify-content: center;
     }
 
-    .control {
+    .radio-group {
         font-family:Arial, Helvetica, sans-serif;
         font-size:0.75rem;
         padding:0.21rem;
         padding-left: 0rem;
         padding-right: 0rem;
         margin: 0;
-        margin-top : 1rem;
         display: flex;
         justify-content: center;
         z-index: 0;
@@ -62,7 +61,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     table {
         border-spacing: 0;
         border-collapse: collapse;
-        margin-bottom: 1rem;
+        margin-top: 1rem;
     }
     td {
         font-family:Arial, Helvetica, sans-serif;
@@ -79,7 +78,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         font-weight: bold;
     }
 
-
+    .timer-button {
+        font-family:Arial, Helvetica, sans-serif;
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
 </style>
 <body>
     <p id="header"             style="font-family:Arial, Helvetica, sans-serif;       font-size:2rem; padding:0rem; margin: 0rem;" align="center" >Table Topics</p>
@@ -87,10 +90,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     <p id="total_time"         style="font-family:Arial, Helvetica, sans-serif;       font-size:2rem; padding:0rem; margin: 0rem; margin-bottom: 1rem;" align="center" >Total time:</p>
 
     <div class="center-all" >
-        <button id="timer_button" style="font-size:1.5rem;">Start</button>
+        <button id="timer_button" class="timer-button">Start</button>
     </div>
     <div class="center-all" >
-        <div class="control" id="control">
+        <div class="radio-group" id="radio_group_1">
             <label class="radio">
                 <input type="radio" name="my_timer_radio" id="radio_table_topics" checked />
                 Table Topics
@@ -103,6 +106,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
                 <input type="radio" name="my_timer_radio" id="radio_speech" />
                 Speech
             </label>
+        </div>
+    </div>
+    <div class="center-all" >
+        <div class="radio-group" id="radio_group_2">
             <label class="radio">
                 <input type="radio" name="my_timer_radio" id="radio_evaluation" />
                 Evaluation
@@ -276,7 +283,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             document.getElementById("radio_demo_mode").disabled         = false;
 
             // Show the radio dials group.
-            document.getElementById("control").style.opacity         = 1;
+            document.getElementById("radio_group_1").style.opacity   = 1;
+            document.getElementById("radio_group_2").style.opacity   = 1;
             document.getElementById("table_of_times").style.opacity  = 1;
             document.getElementById("list_of_timings").style.opacity = 1;
         }
@@ -293,7 +301,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             document.getElementById("radio_demo_mode").disabled         = true;
 
             // Hide the radio dials group.
-            document.getElementById("control").style.opacity         = 0;
+            document.getElementById("radio_group_1").style.opacity   = 0;
+            document.getElementById("radio_group_2").style.opacity   = 0;
             document.getElementById("table_of_times").style.opacity  = 0;
             document.getElementById("list_of_timings").style.opacity = 0;
         }
