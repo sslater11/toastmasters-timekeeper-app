@@ -78,7 +78,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         font-weight: bold;
     }
 
-    .timer-button {
+    .timer-buttons {
         font-family:Arial, Helvetica, sans-serif;
         font-size: 2rem;
         margin-bottom: 1rem;
@@ -90,7 +90,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     <p id="total_time"         style="font-family:Arial, Helvetica, sans-serif;       font-size:2rem; padding:0rem; margin: 0rem; margin-bottom: 1rem;" align="center" >Total time:</p>
 
     <div class="center-all" >
-        <button id="timer_button" class="timer-button">Start</button>
+        <button id="start_stop_button" class="timer-buttons">Start</button>
+        <button id="pause_resume_button" class="timer-buttons">Pause</button>
     </div>
     <div class="center-all" >
         <div class="radio-group" id="radio_group_1">
@@ -105,7 +106,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             <label class="radio">
                 <input type="radio" name="my_timer_radio" id="radio_speech" />
                 Speech
-            </label>
+            </lab/el>
         </div>
     </div>
     <div class="center-all" >
@@ -196,14 +197,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         const FLASHING_COLOR_TRANSITION_IN_MILLIS =  1000;
         const START_FLASHING_AFTER_X_MILLIS       = 30000;
 
-        var is_timer_running = false;
+        var has_timer_started = false;
+        var is_timer_paused   = false;
 
         var all_timings = [];
 
+        var timer_started_at_time = 0;
+        var timer_paused_at_time  = 0;
+        var timer_resumed_at_time = 0;
 
         //------------//
         // Page Setup //
         //------------//
+        // Hide the Pause/Resume button
+        document.getElementById("pause_resume_button").style.opacity = 0;
+
+        // Setup initial layout
         document.getElementById("countdown_timer").style.color = rgb_array_to_string( TIMER_FONT_IDLE_COLOR );
         document.getElementById("total_time").style.color = rgb_array_to_string( TIMER_FONT_IDLE_COLOR );
         document.body.style.backgroundColor = rgb_array_to_string( IDLE_BACKGROUND_COLOR );
@@ -220,8 +229,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         //-----------//
         // Functions //
         //-----------//
-        document.getElementById("timer_button").onclick = function() {
+        document.getElementById("start_stop_button").onclick = function() {
             start_or_stop_timer();
+        };
+
+        document.getElementById("pause_resume_button").onclick = function() {
+            pause_or_resume_timer();
         };
 
         document.getElementById("radio_table_topics").onclick = function() {
@@ -273,7 +286,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             document.getElementById("total_time").style.color = rgb_array_to_string( TIMER_FONT_IDLE_COLOR );
             document.body.style.backgroundColor = rgb_array_to_string( IDLE_BACKGROUND_COLOR );
 
-            document.getElementById("timer_button").innerText = "Start";
+            document.getElementById("start_stop_button").innerText = "Start";
+            document.getElementById("pause_resume_button").innerText = "Pause";
 
             document.getElementById("radio_table_topics").disabled      = false;
             document.getElementById("radio_icebreaker").disabled        = false;
@@ -287,10 +301,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             document.getElementById("radio_group_2").style.opacity   = 1;
             document.getElementById("table_of_times").style.opacity  = 1;
             document.getElementById("list_of_timings").style.opacity = 1;
+
+            // Hide the Pause/Resume button
+            document.getElementById("pause_resume_button").style.opacity = 0;
         }
 
         function before_timer_start() {
-            document.getElementById("timer_button").innerText = "Stop";
+            document.getElementById("start_stop_button").innerText = "Stop";
+            document.getElementById("pause_resume_button").innerText = "Pause";
             document.getElementById("total_time").style.color = rgb_array_to_string( TIMER_FONT_ACTIVE_COLOR );
             
             document.getElementById("radio_table_topics").disabled      = true;
@@ -305,6 +323,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             document.getElementById("radio_group_2").style.opacity   = 0;
             document.getElementById("table_of_times").style.opacity  = 0;
             document.getElementById("list_of_timings").style.opacity = 0;
+
+            // Show the Pause/Resume button
+            document.getElementById("pause_resume_button").style.opacity = 1;
         }
 
         function color_fade_to( start_colour, end_colour, percent ) {
@@ -340,6 +361,37 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             }
         }
 
+        async function pause_or_resume_timer() {
+            // Toggle pausing and resuming the timer.
+
+            // For the rest of the pause handling code, see ther start_stop_timer() function.
+            // The start_stop_timer() function has a 'while loop', which is how the timer updates.
+
+            if( is_timer_paused ) {
+                // Timer will now be resumed.
+                is_timer_paused = ! is_timer_paused;
+                
+                timer_resumed_at_time = Date.now();
+
+                // Need to update the timer, because if we don't it would think we have still been running.
+                time_delta = timer_resumed_at_time - timer_paused_at_time;
+                timer_started_at_time = timer_started_at_time + time_delta;
+                timer_paused_at_time = 0;
+
+                // We will be resuming the timer, so change this button to "Pause", so the user can then pause it again.
+                document.getElementById("pause_resume_button").innerText = "Pause";
+            } else {
+                // Timer will now be paused.
+                is_timer_paused = ! is_timer_paused;
+
+                timer_resumed_at_time = 0;
+                timer_paused_at_time = Date.now();
+
+                // We will be pausing the timer, so change this button to "Resume", so the user can then resume it.
+                document.getElementById("pause_resume_button").innerText = "Resume";
+            }
+        }
+
         async function start_or_stop_timer() {
             var green_card = 0;
             var amber_card = 0;
@@ -348,11 +400,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             var is_demo_mode = false;
             var current_selection_as_str = "";
 
-            if( is_timer_running ) {
-                is_timer_running = false;
+            if( has_timer_started ) {
+                // Stop the timer.
+                has_timer_started = false;
+                is_timer_paused = false;
+                document.getElementById("pause_resume_button").innerText = "Pause";
                 return;
             } else {
-                is_timer_running = true;
+                // Start the timer.
+                has_timer_started = true;
+                is_timer_paused = false;
+                // Commented out. pause_resume_button's text is changed in the function before_timer_start()
+                // meaning we don't need to change it here like we did in the if clause.
+                //document.getElementById("pause_resume_button").innerText = "Pause";
 
                 //// Scroll to the top of the screen after pressing the start button.
                 // Commented out as it doesn't work on mobile but works on desktop :(.
@@ -416,21 +476,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             }
 
 
-            start_time = Date.now();
+            timer_started_at_time = Date.now();
             var last_flashing_card_time = 0;
             var is_flashing_background_on = false;
             var time_delta = 0;
-            while( is_timer_running ) {
+            while( has_timer_started ) {
+                if( is_timer_paused ) {
+                    // Timer paused.
+                    // We should do nothing.
+                    // Just run the sleep code to update the screen when the user presses Resume.
+
+                    // sleep one liner - an easy way to do FPS.
+                    await new Promise(r => setTimeout(r, 1000 / FPS));
+                    continue;
+                } else {
+                    // Timer not paused.
                 var current_time = Date.now();
                 if( is_demo_mode == true ) {
                     time_delta += 300;
-                    if( time_delta > red_card + START_FLASHING_AFTER_X_MILLIS ) {
+                    if( time_delta > ( red_card + START_FLASHING_AFTER_X_MILLIS ) ) {
                         // Stops the screen flashing too fast when we get into flashing mode.
                         is_demo_mode = false;
-                        start_time = Date.now() - time_delta;
+                        timer_started_at_time = Date.now() - time_delta;
                     }
                 } else {
-                    time_delta = current_time - start_time;
+                    time_delta = current_time - timer_started_at_time;
                 }
 
                 var time_str = milliseconds_to_time_str( time_delta, false );
@@ -487,6 +557,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 
                 // sleep one liner - an easy way to do FPS.
                 await new Promise(r => setTimeout(r, 1000 / FPS));
+                }
             }
             all_timings = all_timings.concat( [[current_selection_as_str, milliseconds_to_time_str( time_delta, true ) ]] );
             generate_timings_table();
