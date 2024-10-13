@@ -95,6 +95,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         <button id="sub_1_minute_button" class="timer-buttons">-1 min</button>
         <button id="add_1_minute_button" class="timer-buttons">+1 min</button>
     </div>
+    <div class="center-all" ></div>
+        <button id="restore_previous_timer_button" class="timer-buttons">Restore Previous</button>
+    </div>
     <div class="center-all" >
         <div class="radio-group" id="radio_group_1">
             <label class="radio">
@@ -149,6 +152,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     </div>
 
     <script>
+        const STR_DEMO_MODE          = "Demo Mode";
+        const STR_TABLE_TOPICS       = "Table Topics";
+        const STR_ICEBREAKER         = "Icebreaker";
+        const STR_SPEECH             = "Speech";
+        const STR_EVALUATION         = "Evaluation";
+        const STR_GENERAL_EVALUATOR  = "General Evaluator";
+
         const TABLE_TOPICS_GREEN_CARD = 1   * 60 * 1000;
         const TABLE_TOPICS_AMBER_CARD = 1.5 * 60 * 1000;
         const TABLE_TOPICS_RED_CARD   = 2   * 60 * 1000;
@@ -201,6 +211,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 
         var has_timer_started = false;
         var is_timer_paused   = false;
+        var is_demo_mode = false;
 
         var all_timings = [];
 
@@ -208,12 +219,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         var last_flashing_card_time = 0;
 
         var timer_started_at_time = 0;
+        var timer_stopped_at_time = 0;
         var timer_paused_at_time  = 0;
         var timer_resumed_at_time = 0;
 
         var green_card = 0;
         var amber_card = 0;
         var red_card   = 0;
+        var speech_header_as_str = "";
 
         //------------//
         // Page Setup //
@@ -222,6 +235,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         document.getElementById("pause_resume_button").style.opacity = 0;
         document.getElementById("sub_1_minute_button").style.opacity = 0;
         document.getElementById("add_1_minute_button").style.opacity = 0;
+
+        // Hide the restore previous session button.
+        document.getElementById("restore_previous_timer_button").style.opacity = 0;
 
         // Setup initial layout
         document.getElementById("countdown_timer").style.color = rgb_array_to_string( TIMER_FONT_IDLE_COLOR );
@@ -241,7 +257,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         // Functions //
         //-----------//
         document.getElementById("start_stop_button").onclick = function() {
-            start_or_stop_timer();
+            start_or_stop_timer( true );
         };
 
         document.getElementById("pause_resume_button").onclick = function() {
@@ -254,6 +270,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 
         document.getElementById("add_1_minute_button").onclick = function() {
             add_x_seconds_to_speakers_time( 60 );
+        };
+
+        document.getElementById("restore_previous_timer_button").onclick = function() {
+                // Start the timer from where we left off.
+                // Select the radio dial for the previous speech, so the mode stays the same when the timer is stopped.
+                switch( speech_header_as_str ) {
+                    case STR_DEMO_MODE:
+                        is_demo_mode = true;
+                        document.getElementById( "radio_demo_mode" ).checked  = true;
+                        break;
+                    case STR_TABLE_TOPICS:
+                        document.getElementById("radio_table_topics").checked = true;
+                        break;
+                    case STR_ICEBREAKER:
+                        document.getElementById("radio_icebreaker").checked   = true;
+                        break;
+                    case STR_SPEECH:
+                        document.getElementById("radio_speech").checked       = true;
+                        break;
+                    case STR_EVALUATION:
+                        document.getElementById("radio_evaluation").checked   = true;
+                        break;
+                    case STR_GENERAL_EVALUATOR:
+                        document.getElementById("radio_general_evaluator").checked = true;
+                        break;
+                    default:
+                        console.log("Should never reach this. Oh my cheeses.");
+                }
+                start_or_stop_timer( false );
         };
 
         document.getElementById("radio_table_topics").onclick = function() {
@@ -321,6 +366,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             document.getElementById("table_of_times").style.opacity  = 1;
             document.getElementById("list_of_timings").style.opacity = 1;
 
+            // Show the restore previous session button.
+            document.getElementById("restore_previous_timer_button").style.opacity = 1;
+
             // Hide the Pause/Resume button
             document.getElementById("pause_resume_button").style.opacity = 0;
             document.getElementById("sub_1_minute_button").style.opacity = 0;
@@ -344,6 +392,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             document.getElementById("radio_group_2").style.opacity   = 0;
             document.getElementById("table_of_times").style.opacity  = 0;
             document.getElementById("list_of_timings").style.opacity = 0;
+
+            // Hide the restore previous session button.
+            document.getElementById("restore_previous_timer_button").style.opacity = 0;
 
             // Show the Pause/Resume button
             document.getElementById("pause_resume_button").style.opacity = 1;
@@ -404,7 +455,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             if( is_timer_paused ) {
                 // Timer will now be resumed.
                 is_timer_paused = ! is_timer_paused;
-                
+
                 timer_resumed_at_time = Date.now();
 
                 // Need to update the timer, because if we don't it would think we have still been running.
@@ -426,14 +477,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             }
         }
 
-        async function start_or_stop_timer() {
-            let is_demo_mode = false;
-            let current_selection_as_str = "";
-
+        async function start_or_stop_timer( should_we_restart_timer ) {
             if( has_timer_started ) {
                 // Stop the timer.
+                timer_stopped_at_time = Date.now();
                 has_timer_started = false;
                 is_timer_paused = false;
+
                 document.getElementById("pause_resume_button").innerText = "Pause";
                 return;
             } else {
@@ -462,6 +512,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             }
 
             before_timer_start();
+            let time_delta = timer_stopped_at_time;
+
+            if( should_we_restart_timer ) {
+                time_delta = 0;
 
             radio_id = document.querySelector('input[name="my_timer_radio"]:checked').id;
             if( radio_id == "radio_demo_mode" ) {
@@ -469,47 +523,54 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
                 amber_card = DEMO_MODE_AMBER_CARD;
                 red_card   = DEMO_MODE_RED_CARD;
                 is_demo_mode = true;
-                current_selection_as_str = "Demo Mode";
+                speech_header_as_str = STR_DEMO_MODE;
             }
             else if( radio_id == "radio_table_topics" ) {
                 green_card = TABLE_TOPICS_GREEN_CARD;
                 amber_card = TABLE_TOPICS_AMBER_CARD;
                 red_card   = TABLE_TOPICS_RED_CARD;
-                current_selection_as_str = "Table Topics";
+                speech_header_as_str = STR_TABLE_TOPICS;
             }
             else if( radio_id == "radio_icebreaker" ) {
                 green_card = ICEBREAKER_GREEN_CARD;
                 amber_card = ICEBREAKER_AMBER_CARD;
                 red_card   = ICEBREAKER_RED_CARD;
-                current_selection_as_str = "Icebreaker";
+                speech_header_as_str = STR_ICEBREAKER;
             }
             else if( radio_id == "radio_speech" ) {
                 green_card = SPEECH_GREEN_CARD;
                 amber_card = SPEECH_AMBER_CARD;
                 red_card   = SPEECH_RED_CARD;
-                current_selection_as_str = "Speech";
+                speech_header_as_str = STR_SPEECH;
             }
             else if( radio_id == "radio_evaluation" ) {
                 green_card = EVALUATION_GREEN_CARD;
                 amber_card = EVALUATION_AMBER_CARD;
                 red_card   = EVALUATION_RED_CARD;
-                current_selection_as_str = "Evaluation";
+                speech_header_as_str = STR_EVALUATION;
             }
             else if( radio_id == "radio_general_evaluator" ) {
                 green_card = GENERAL_EVALUATOR_GREEN_CARD;
                 amber_card = GENERAL_EVALUATOR_AMBER_CARD;
                 red_card   = GENERAL_EVALUATOR_RED_CARD;
-                current_selection_as_str = "General Evaluator";
+                speech_header_as_str = STR_GENERAL_EVALUATOR;
             }
             else {
                 console.log("No option selected. This should never happen.")
             }
 
-
             timer_started_at_time = Date.now();
             last_flashing_card_time = 0;
             is_flashing_background_on = false;
-            let time_delta = 0;
+            } else {
+                    // Need to update the timer, because if we don't it would think we have still been running.
+                    let time_delta = Date.now() - timer_stopped_at_time;
+                    timer_started_at_time = timer_started_at_time + time_delta;
+                    timer_stopped_at_time = 0;
+
+                    // Display the previous timer's heading.
+                    document.getElementById('header').textContent = speech_header_as_str;
+            }
             while( has_timer_started ) {
                 if( is_timer_paused ) {
                     // Timer paused.
@@ -543,7 +604,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
                 await new Promise(r => setTimeout(r, 1000 / FPS));
                 }
             }
-            all_timings = all_timings.concat( [[current_selection_as_str, milliseconds_to_time_str( time_delta, true ) ]] );
+            all_timings = all_timings.concat( [[speech_header_as_str, milliseconds_to_time_str( time_delta, true ) ]] );
             generate_timings_table();
             after_timer_stop();
         }
