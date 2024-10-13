@@ -517,51 +517,51 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             if( should_we_restart_timer ) {
                 time_delta = 0;
 
-            radio_id = document.querySelector('input[name="my_timer_radio"]:checked').id;
-            if( radio_id == "radio_demo_mode" ) {
-                green_card = DEMO_MODE_GREEN_CARD;
-                amber_card = DEMO_MODE_AMBER_CARD;
-                red_card   = DEMO_MODE_RED_CARD;
-                is_demo_mode = true;
-                speech_header_as_str = STR_DEMO_MODE;
-            }
-            else if( radio_id == "radio_table_topics" ) {
-                green_card = TABLE_TOPICS_GREEN_CARD;
-                amber_card = TABLE_TOPICS_AMBER_CARD;
-                red_card   = TABLE_TOPICS_RED_CARD;
-                speech_header_as_str = STR_TABLE_TOPICS;
-            }
-            else if( radio_id == "radio_icebreaker" ) {
-                green_card = ICEBREAKER_GREEN_CARD;
-                amber_card = ICEBREAKER_AMBER_CARD;
-                red_card   = ICEBREAKER_RED_CARD;
-                speech_header_as_str = STR_ICEBREAKER;
-            }
-            else if( radio_id == "radio_speech" ) {
-                green_card = SPEECH_GREEN_CARD;
-                amber_card = SPEECH_AMBER_CARD;
-                red_card   = SPEECH_RED_CARD;
-                speech_header_as_str = STR_SPEECH;
-            }
-            else if( radio_id == "radio_evaluation" ) {
-                green_card = EVALUATION_GREEN_CARD;
-                amber_card = EVALUATION_AMBER_CARD;
-                red_card   = EVALUATION_RED_CARD;
-                speech_header_as_str = STR_EVALUATION;
-            }
-            else if( radio_id == "radio_general_evaluator" ) {
-                green_card = GENERAL_EVALUATOR_GREEN_CARD;
-                amber_card = GENERAL_EVALUATOR_AMBER_CARD;
-                red_card   = GENERAL_EVALUATOR_RED_CARD;
-                speech_header_as_str = STR_GENERAL_EVALUATOR;
-            }
-            else {
-                console.log("No option selected. This should never happen.")
-            }
+                radio_id = document.querySelector('input[name="my_timer_radio"]:checked').id;
+                if( radio_id == "radio_demo_mode" ) {
+                    green_card = DEMO_MODE_GREEN_CARD;
+                    amber_card = DEMO_MODE_AMBER_CARD;
+                    red_card   = DEMO_MODE_RED_CARD;
+                    is_demo_mode = true;
+                    speech_header_as_str = STR_DEMO_MODE;
+                }
+                else if( radio_id == "radio_table_topics" ) {
+                    green_card = TABLE_TOPICS_GREEN_CARD;
+                    amber_card = TABLE_TOPICS_AMBER_CARD;
+                    red_card   = TABLE_TOPICS_RED_CARD;
+                    speech_header_as_str = STR_TABLE_TOPICS;
+                }
+                else if( radio_id == "radio_icebreaker" ) {
+                    green_card = ICEBREAKER_GREEN_CARD;
+                    amber_card = ICEBREAKER_AMBER_CARD;
+                    red_card   = ICEBREAKER_RED_CARD;
+                    speech_header_as_str = STR_ICEBREAKER;
+                }
+                else if( radio_id == "radio_speech" ) {
+                    green_card = SPEECH_GREEN_CARD;
+                    amber_card = SPEECH_AMBER_CARD;
+                    red_card   = SPEECH_RED_CARD;
+                    speech_header_as_str = STR_SPEECH;
+                }
+                else if( radio_id == "radio_evaluation" ) {
+                    green_card = EVALUATION_GREEN_CARD;
+                    amber_card = EVALUATION_AMBER_CARD;
+                    red_card   = EVALUATION_RED_CARD;
+                    speech_header_as_str = STR_EVALUATION;
+                }
+                else if( radio_id == "radio_general_evaluator" ) {
+                    green_card = GENERAL_EVALUATOR_GREEN_CARD;
+                    amber_card = GENERAL_EVALUATOR_AMBER_CARD;
+                    red_card   = GENERAL_EVALUATOR_RED_CARD;
+                    speech_header_as_str = STR_GENERAL_EVALUATOR;
+                }
+                else {
+                    console.log("No option selected. This should never happen.")
+                }
 
-            timer_started_at_time = Date.now();
-            last_flashing_card_time = 0;
-            is_flashing_background_on = false;
+                timer_started_at_time = Date.now();
+                last_flashing_card_time = 0;
+                is_flashing_background_on = false;
             } else {
                     // Need to update the timer, because if we don't it would think we have still been running.
                     let time_delta = Date.now() - timer_stopped_at_time;
@@ -583,25 +583,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
                     continue;
                 } else {
                     // Timer not paused.
-                let current_time = Date.now();
-                if( is_demo_mode == true ) {
-                    if( time_delta > ( red_card + START_FLASHING_AFTER_X_MILLIS ) ) {
-                        // Slow the timer down to normal speed during the background flashing mode.
+                    let current_time = Date.now();
+                    if( is_demo_mode == true ) {
+                        if( time_delta > ( red_card + START_FLASHING_AFTER_X_MILLIS ) ) {
+                            // Slow the timer down to normal speed during the background flashing mode.
+                            time_delta = current_time - timer_started_at_time;
+                        }
+                        else {
+                            // Makes the countdown timer go faster for the demo.
+                            time_delta += 300;
+                            timer_started_at_time = Date.now() - time_delta;
+                        }
+                    } else {
                         time_delta = current_time - timer_started_at_time;
                     }
-                    else {
-                        // Makes the countdown timer go faster for the demo.
-                        time_delta += 300;
-                        timer_started_at_time = Date.now() - time_delta;
-                    }
-                } else {
-                    time_delta = current_time - timer_started_at_time;
-                }
 
-                updateScreen( time_delta );
+                    updateScreen( time_delta );
 
-                // sleep one liner - an easy way to do FPS.
-                await new Promise(r => setTimeout(r, 1000 / FPS));
+                    // sleep one liner - an easy way to do FPS.
+                    await new Promise(r => setTimeout(r, 1000 / FPS));
                 }
             }
             all_timings = all_timings.concat( [[speech_header_as_str, milliseconds_to_time_str( time_delta, true ) ]] );
@@ -644,7 +644,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
                     document.getElementById("total_time").style.color = rgb_array_to_string( font_rgb );
                 }
             } else if( time_delta >= red_card ) {
-                // todo - remember to indent that code i updated in the last commit.
                 document.body.style.backgroundColor = rgb_array_to_string( RED_CARD_COLOR );
                 document.getElementById("total_time").style.color      = rgb_array_to_string( TIMER_FONT_ACTIVE_COLOR );
                 document.getElementById("countdown_timer").style.color = rgb_array_to_string( TIMER_FONT_ACTIVE_COLOR );
