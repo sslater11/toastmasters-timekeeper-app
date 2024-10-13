@@ -280,21 +280,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
                         is_demo_mode = true;
                         document.getElementById( "radio_demo_mode" ).checked  = true;
                         break;
+
                     case STR_TABLE_TOPICS:
                         document.getElementById("radio_table_topics").checked = true;
                         break;
+
                     case STR_ICEBREAKER:
                         document.getElementById("radio_icebreaker").checked   = true;
                         break;
+
                     case STR_SPEECH:
                         document.getElementById("radio_speech").checked       = true;
                         break;
+
                     case STR_EVALUATION:
                         document.getElementById("radio_evaluation").checked   = true;
                         break;
+
                     case STR_GENERAL_EVALUATOR:
                         document.getElementById("radio_general_evaluator").checked = true;
                         break;
+
                     default:
                         console.log("Should never reach this. Oh my cheeses.");
                 }
@@ -518,45 +524,52 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
                 time_delta = 0;
 
                 radio_id = document.querySelector('input[name="my_timer_radio"]:checked').id;
-                if( radio_id == "radio_demo_mode" ) {
-                    green_card = DEMO_MODE_GREEN_CARD;
-                    amber_card = DEMO_MODE_AMBER_CARD;
-                    red_card   = DEMO_MODE_RED_CARD;
-                    is_demo_mode = true;
-                    speech_header_as_str = STR_DEMO_MODE;
-                }
-                else if( radio_id == "radio_table_topics" ) {
-                    green_card = TABLE_TOPICS_GREEN_CARD;
-                    amber_card = TABLE_TOPICS_AMBER_CARD;
-                    red_card   = TABLE_TOPICS_RED_CARD;
-                    speech_header_as_str = STR_TABLE_TOPICS;
-                }
-                else if( radio_id == "radio_icebreaker" ) {
-                    green_card = ICEBREAKER_GREEN_CARD;
-                    amber_card = ICEBREAKER_AMBER_CARD;
-                    red_card   = ICEBREAKER_RED_CARD;
-                    speech_header_as_str = STR_ICEBREAKER;
-                }
-                else if( radio_id == "radio_speech" ) {
-                    green_card = SPEECH_GREEN_CARD;
-                    amber_card = SPEECH_AMBER_CARD;
-                    red_card   = SPEECH_RED_CARD;
-                    speech_header_as_str = STR_SPEECH;
-                }
-                else if( radio_id == "radio_evaluation" ) {
-                    green_card = EVALUATION_GREEN_CARD;
-                    amber_card = EVALUATION_AMBER_CARD;
-                    red_card   = EVALUATION_RED_CARD;
-                    speech_header_as_str = STR_EVALUATION;
-                }
-                else if( radio_id == "radio_general_evaluator" ) {
-                    green_card = GENERAL_EVALUATOR_GREEN_CARD;
-                    amber_card = GENERAL_EVALUATOR_AMBER_CARD;
-                    red_card   = GENERAL_EVALUATOR_RED_CARD;
-                    speech_header_as_str = STR_GENERAL_EVALUATOR;
-                }
-                else {
-                    console.log("No option selected. This should never happen.")
+                switch( radio_id ) {
+                    case "radio_demo_mode":
+                        is_demo_mode = true;
+                        green_card = DEMO_MODE_GREEN_CARD;
+                        amber_card = DEMO_MODE_AMBER_CARD;
+                        red_card   = DEMO_MODE_RED_CARD;
+                        speech_header_as_str = STR_DEMO_MODE;
+                        break;
+
+                    case "radio_table_topics":
+                        green_card = TABLE_TOPICS_GREEN_CARD;
+                        amber_card = TABLE_TOPICS_AMBER_CARD;
+                        red_card   = TABLE_TOPICS_RED_CARD;
+                        speech_header_as_str = STR_TABLE_TOPICS;
+                        break;
+
+                    case "radio_icebreaker":
+                        green_card = ICEBREAKER_GREEN_CARD;
+                        amber_card = ICEBREAKER_AMBER_CARD;
+                        red_card   = ICEBREAKER_RED_CARD;
+                        speech_header_as_str = STR_ICEBREAKER;
+                        break;
+
+                    case "radio_speech":
+                        green_card = SPEECH_GREEN_CARD;
+                        amber_card = SPEECH_AMBER_CARD;
+                        red_card   = SPEECH_RED_CARD;
+                        speech_header_as_str = STR_SPEECH;
+                        break;
+
+                    case "radio_evaluation":
+                        green_card = EVALUATION_GREEN_CARD;
+                        amber_card = EVALUATION_AMBER_CARD;
+                        red_card   = EVALUATION_RED_CARD;
+                        speech_header_as_str = STR_EVALUATION;
+                        break;
+
+                    case "radio_general_evaluator":
+                        green_card = GENERAL_EVALUATOR_GREEN_CARD;
+                        amber_card = GENERAL_EVALUATOR_AMBER_CARD;
+                        red_card   = GENERAL_EVALUATOR_RED_CARD;
+                        speech_header_as_str = STR_GENERAL_EVALUATOR;
+                        break;
+
+                    default:
+                        console.log("No option selected. This should never happen.")
                 }
 
                 timer_started_at_time = Date.now();
