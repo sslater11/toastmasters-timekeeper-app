@@ -244,7 +244,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 
         var all_timings = [];
 
-        var is_flashing_background_on = false;
+        var is_flashing_background_on = false; // Used to toggle between the two colors.
         var last_flashing_card_time = 0;
 
         var timer_started_at_time = 0;
@@ -440,7 +440,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             document.getElementById("total_time").style.color = rgb_array_to_string( TIMER_FONT_IDLE_COLOR );
             document.body.style.backgroundColor = rgb_array_to_string( IDLE_BACKGROUND_COLOR );
 
-            document.getElementById("start_stop_button").innerText = "Start";
+            document.getElementById("start_stop_button").innerText   = "Start";
             document.getElementById("pause_resume_button").innerText = "Pause";
 
             document.getElementById("radio_table_topics").disabled      = false;
@@ -461,7 +461,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         }
 
         function before_timer_start() {
-            document.getElementById("start_stop_button").innerText = "Stop";
+            document.getElementById("start_stop_button").innerText   = "Stop";
             document.getElementById("pause_resume_button").innerText = "Pause";
             document.getElementById("total_time").style.color = rgb_array_to_string( TIMER_FONT_ACTIVE_COLOR );
             
@@ -548,7 +548,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 
                 // We will be resuming the timer, so change this button to "Pause", so the user can then pause it again.
                 document.getElementById("pause_resume_button").innerText = "Pause";
+
+                // Set the alpha for the text to 100%
+                let new_color = get_colour_with_new_alpha( document.getElementById("countdown_timer").style.color, 1);
+                document.getElementById("countdown_timer").style.color = new_color;
             } else {
+                // Need to update the timer, because if we don't it would think we have still been running.
                 // Timer will now be paused.
                 is_timer_paused = ! is_timer_paused;
 
@@ -826,6 +831,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             }
         }
 
+        // Function to convert RGB to RGBA with a new alpha value
+        function get_colour_with_new_alpha(color, alpha) {
+            // Match the RGB values in the string.
+            const rgb_values = color.match(/\d+/g);
+    
+            if (rgb_values) {
+                // Create an RGBA string
+                return `rgba(${rgb_values[0]}, ${rgb_values[1]}, ${rgb_values[2]}, ${alpha})`;
+            }
+
+            // Return the original color if it doesn't match.
+            return color;
+        }
+
         /**
          * This will update the screen, changing colors, all depending on the time remaining.
          */
@@ -843,23 +862,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
                     last_flashing_card_time = time_delta;
                 }
 
+                let percentage = get_difference_in_time_as_percentage( time_delta, last_flashing_card_time + FLASHING_COLOR_TRANSITION_IN_MILLIS, FLASHING_COLOR_TRANSITION_IN_MILLIS );
+                let background_rgb = "";
+                let font_rgb = "";
                 if( is_flashing_background_on ) {
-                    let percentage = get_difference_in_time_as_percentage( time_delta, last_flashing_card_time + FLASHING_COLOR_TRANSITION_IN_MILLIS, FLASHING_COLOR_TRANSITION_IN_MILLIS )
-                    let background_rgb = color_fade_to( RED_CARD_COLOR, RED_CARD_FLASHING, percentage );
-                    let font_rgb = color_fade_to( TIMER_FONT_ACTIVE_COLOR, TIMER_FONT_FLASHING_COLOR, percentage );
-
-                    document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
-                    document.getElementById("countdown_timer").style.color = rgb_array_to_string( font_rgb );
-                    document.getElementById("total_time").style.color = rgb_array_to_string( font_rgb );
+                    background_rgb = color_fade_to( RED_CARD_COLOR,    RED_CARD_FLASHING, percentage );
+                    font_rgb       = color_fade_to( TIMER_FONT_ACTIVE_COLOR,   TIMER_FONT_FLASHING_COLOR, percentage );
                 } else {
-                    let percentage = get_difference_in_time_as_percentage( time_delta, last_flashing_card_time + FLASHING_COLOR_TRANSITION_IN_MILLIS, FLASHING_COLOR_TRANSITION_IN_MILLIS )
-                    let background_rgb = color_fade_to( RED_CARD_FLASHING, RED_CARD_COLOR, percentage );
-                    let font_rgb = color_fade_to( TIMER_FONT_FLASHING_COLOR, TIMER_FONT_ACTIVE_COLOR, percentage );
-
-                    document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
-                    document.getElementById("countdown_timer").style.color = rgb_array_to_string( font_rgb );
-                    document.getElementById("total_time").style.color = rgb_array_to_string( font_rgb );
+                    background_rgb = color_fade_to( RED_CARD_FLASHING, RED_CARD_COLOR,    percentage );
+                    font_rgb       = color_fade_to( TIMER_FONT_FLASHING_COLOR, TIMER_FONT_ACTIVE_COLOR,   percentage );
+                    
                 }
+
+                document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
+                document.getElementById("countdown_timer").style.color = rgb_array_to_string( font_rgb );
+                document.getElementById("total_time").style.color = rgb_array_to_string( font_rgb );
             } else if( time_delta >= red_card ) {
                 document.body.style.backgroundColor = rgb_array_to_string( RED_CARD_COLOR );
                 document.getElementById("total_time").style.color      = rgb_array_to_string( TIMER_FONT_ACTIVE_COLOR );
@@ -889,6 +906,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 
                 console.log("should never reach this condition - time_delta could be negative?  time_delta: " + time_delta );
                     document.body.style.backgroundColor = rgb_array_to_string( IDLE_BACKGROUND_COLOR );
+            }
+
+            // Flash the numbers whilst paused.
+            if( is_timer_paused ) {
+                let time_delta_since_paused = Date.now() - timer_paused_at_time;
+                let difference = time_delta_since_paused % (FLASHING_COLOR_TRANSITION_IN_MILLIS);
+                let is_flashing_whilst_paused_on = false;
+
+                if( (time_delta_since_paused % (FLASHING_COLOR_TRANSITION_IN_MILLIS *2)) > FLASHING_COLOR_TRANSITION_IN_MILLIS ) {
+                    is_flashing_whilst_paused_on = true;
+                } else {
+                    is_flashing_whilst_paused_on = false;
+                }
+
+                let percentage = get_difference_in_time_as_percentage( time_delta_since_paused, difference + time_delta_since_paused, FLASHING_COLOR_TRANSITION_IN_MILLIS )
+                if( is_flashing_whilst_paused_on ) {
+                    percentage = 1-percentage; // Invert the percentage to fade the color the opposite way.
+                }
+                let new_color = get_colour_with_new_alpha( document.getElementById("countdown_timer").style.color, percentage);
+                document.getElementById("total_time").style.color      = new_color;
+                document.getElementById("countdown_timer").style.color = new_color;
             }
         }
 
