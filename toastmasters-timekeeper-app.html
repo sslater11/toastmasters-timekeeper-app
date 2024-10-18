@@ -22,6 +22,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 -->
 
+<!--
+    Version number - See the div tag below called version_number.
+-->
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -62,7 +66,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     table {
         border-spacing: 0;
         border-collapse: collapse;
-        margin-top: 1rem;
+        margin-top:    1rem;
+        margin-bottom: 1rem;
     }
 
     td {
@@ -93,10 +98,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     .timer-session-buttons {
         font-family:Arial, Helvetica, sans-serif;
         font-size: 1.5rem;
-        margin-top: 1rem;
-        margin-bottom: 1rem;
+        margin-top: 0rem;
+        margin-bottom: 0rem;
         margin-left: 0.25rem;
         margin-right: 0.25rem;
+    }
+
+    .reminder-text {
+        font-family:Arial, Helvetica, sans-serif;
+        font-size: 1rem;
+        white-space: pre; /* Preserve spaces for the +1min -1min text box */
+        
+        padding:0rem;
+        margin: 0rem;
+        margin-bottom: 1rem;
+        color: rgb(90,90,90);
+    }
+    
+    .text-plus-minus {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 2rem;
+        white-space: pre; /* Preserve spaces for the +1min -1min text box */
+        padding: 0rem;
+        margin:  0rem;
     }
 </style>
 <body>
@@ -108,6 +132,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         <button id="start_stop_button"   class="timer-buttons">Start</button>
         <button id="pause_resume_button" class="timer-buttons">Pause</button>
     </div>
+
+    <b><div class="center-all" id="screen_awake_reminder_div">
+    </div></b>
 
     <div id="timer_controls" class="center-all"></div>
         <!-- for the +1min and -1min buttons -->
@@ -168,7 +195,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     </div>
 
     <div class="center-all" >
-        <div id="list_of_timings"></div>
+        <div id="list_of_timings">
+        </div>
+    </div>
+
+    <br>
+    <div id="version_number" class="center-all">
+        <p class="reminder-text">Version 3.0 on 17/10/24</p><!-- CHANGE THIS IN THE README TOO -->
+    </div>
+
+    <div id="github_link" class="center-all">
+        <p class="reminder-text">https://github.com/sslater11/toastmasters-timekeeper-app</p>
     </div>
 
     <script>
@@ -280,10 +317,50 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         document.getElementById('red_time_header'  ).style.backgroundColor = rgb_array_to_string( RED_CARD_COLOR   );
 
         add_short_break_button();
+        add_screen_awake_reminder();
 
         //-----------//
         // Functions //
         //-----------//
+
+        function add_screen_awake_reminder() {
+            // Remove all elements from the div.
+            remove_all_elements_from_div( 'screen_awake_reminder_div' );
+            const reminder_element = document.createElement('span');
+
+            reminder_element.id         = "screen_awake_reminder";
+            reminder_element.className  = "reminder-text";
+
+            reminder_element.addEventListener('click', () => {
+                update_screen_awake_reminder();
+            });
+
+            // Append the button to the container
+            document.getElementById( 'screen_awake_reminder_div' ).appendChild( reminder_element );
+
+            update_screen_awake_reminder();
+        }
+
+        function remove_screen_awake_reminder() {
+            // Remove all elements from the div.
+            remove_all_elements_from_div( 'screen_awake_reminder_div' );
+        }
+
+        function update_screen_awake_reminder() {
+            screen_awake_element = document.getElementById("screen_awake_reminder");
+            if( screen_awake_element !== null | screen_awake_element !== undefined ) {
+                const android_text = "Android:\n\tAndroid Settings > Display > Screen Timeout\n\n\tSettings > Type \"Screen Timeout\" into the search bar.\n\n\tIf you have 'caffeine' in your quick tiles,\n\ttapping this will keep the screen awake\n\tfor the length of time shown on the tile.";
+                const iphone_text  = "iPhone:\n\tSettings > Display & Brightness > Auto-Lock.\n\tSelect \"Never\" to keep the screen on.";
+                const screen_awake_remember_text = "Remember to keep the screen awake. Tap for more info.";
+                const screen_awake_settings_text = "How to keep the screen awake:\n\n" + android_text + "\n\n" + iphone_text;
+
+                if ( screen_awake_element.textContent == screen_awake_remember_text ) { 
+                    screen_awake_element.textContent = screen_awake_settings_text;
+                } else {
+                    screen_awake_element.textContent = screen_awake_remember_text;
+                }
+            }
+        }
 
         function add_plus_minus_buttons() {
             // Remove all elements from the div.
@@ -294,13 +371,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             const minus_button = document.createElement('button');
             const text_minutes = document.createElement('span');
 
-            text_minutes.id = "text_plus_minus";
+            text_minutes.id        = "text_plus_minus";
+            text_minutes.className = "text-plus-minus"
 
             plus_button.innerText  = '+1 min';
             minus_button.innerText = '-1 min';
             plus_button.className  = "timer-buttons"
             minus_button.className = "timer-buttons"
-            text_minutes.className = "timer-buttons";
+            text_minutes.className = "text-plus-minus"
 
             // Add an event listener to the button
             plus_button.addEventListener('click', () => {
@@ -315,7 +393,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             document.getElementById( 'timer_controls' ).appendChild( text_minutes );
             document.getElementById( 'timer_controls' ).appendChild( minus_button );
 
-            updateMinutesPlusMinusText();
+            update_minutes_plus_minus_text();
         }
 
         function remove_plus_minus_buttons() {
@@ -450,11 +528,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             document.getElementById("radio_general_evaluator").disabled = false;
             document.getElementById("radio_demo_mode").disabled         = false;
 
-            // Show the radio dials group.
+            // Show elements
             document.getElementById("radio_group_1").style.opacity   = 1;
             document.getElementById("radio_group_2").style.opacity   = 1;
             document.getElementById("table_of_times").style.opacity  = 1;
             document.getElementById("list_of_timings").style.opacity = 1;
+            document.getElementById("version_number").style.opacity  = 1;
+            document.getElementById("github_link").style.opacity     = 1;
 
             // Hide the Pause/Resume button
             document.getElementById("pause_resume_button").style.opacity = 0;
@@ -472,11 +552,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             document.getElementById("radio_general_evaluator").disabled = true;
             document.getElementById("radio_demo_mode").disabled         = true;
 
-            // Hide the radio dials group.
+            // Hide elements.
             document.getElementById("radio_group_1").style.opacity   = 0;
             document.getElementById("radio_group_2").style.opacity   = 0;
             document.getElementById("table_of_times").style.opacity  = 0;
             document.getElementById("list_of_timings").style.opacity = 0;
+            document.getElementById("version_number").style.opacity  = 0;
+            document.getElementById("github_link").style.opacity     = 0;
 
             // Show the Pause/Resume button
             document.getElementById("pause_resume_button").style.opacity = 1;
@@ -526,7 +608,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             red_card   += seconds * 1000;
 
             minutes_plus_minus += (seconds / 60);
-            updateMinutesPlusMinusText();
+            update_minutes_plus_minus_text();
         }
 
         async function pause_or_resume_timer() {
@@ -578,6 +660,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
                 document.getElementById("pause_resume_button").innerText = "Pause";
                 remove_plus_minus_buttons();
                 add_short_break_button();
+                add_screen_awake_reminder()
 
                 if( speech_header_as_str == STR_SHORT_BREAK ) {
                     // Reset the header to the user's choice.
@@ -591,6 +674,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
                 is_timer_paused = false;
 
                 remove_short_break_button();
+                remove_screen_awake_reminder();
 
                 if( (timer_mode == TIMER_MODE_START_OR_STOP) || (timer_mode == TIMER_MODE_SHORT_BREAK) ) {
                     minutes_plus_minus = 0;
@@ -680,7 +764,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 
                     // Display the previous timer's heading.
                     document.getElementById('header').textContent = speech_header_as_str;
-                    updateMinutesPlusMinusText();
+                    update_minutes_plus_minus_text();
             } else if( timer_mode == TIMER_MODE_SHORT_BREAK ) {
                 green_card = SHORT_BREAK_GREEN_CARD;
                 amber_card = SHORT_BREAK_AMBER_CARD;
@@ -821,13 +905,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 
         }
 
-        function updateMinutesPlusMinusText() {
+        function update_minutes_plus_minus_text() {
             if( minutes_plus_minus > 0 ){
-                document.getElementById("text_plus_minus").textContent = " +" + minutes_plus_minus + " ";
+                document.getElementById("text_plus_minus").textContent = "+" + minutes_plus_minus;
             } else if( minutes_plus_minus == 0 ){
-                document.getElementById("text_plus_minus").textContent = "    ";
+                document.getElementById("text_plus_minus").textContent = "  ";
             } else {
-                document.getElementById("text_plus_minus").textContent = " " + minutes_plus_minus + " ";
+                document.getElementById("text_plus_minus").textContent = minutes_plus_minus;
             }
         }
 
