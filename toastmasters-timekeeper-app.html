@@ -106,7 +106,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 
     .reminder-text {
         font-family:Arial, Helvetica, sans-serif;
-        font-size: 1rem;
+        font-size: 0.75rem;
         white-space: pre; /* Preserve spaces for the +1min -1min text box */
         
         padding:0rem;
@@ -128,15 +128,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     <b><p id="countdown_timer" style="font-family: 'Courier New', Courier, monospace; font-size:8rem; padding:0rem; margin: 0rem;" align="center" >0:00</p></b>
     <p id="total_time"         style="font-family:Arial, Helvetica, sans-serif;       font-size:2rem; padding:0rem; margin: 0rem; margin-bottom: 1rem;" align="center" >Total time:</p>
 
-    <div class="center-all">
-        <button id="start_stop_button"   class="timer-buttons">Start</button>
-        <button id="pause_resume_button" class="timer-buttons">Pause</button>
+    <div class="center-all" id="timer_start_stop_controls">
     </div>
 
     <b><div class="center-all" id="screen_awake_reminder_div">
     </div></b>
 
-    <div id="timer_controls" class="center-all"></div>
+    <div id="timer_plus_minus_controls" class="center-all"></div>
         <!-- for the +1min and -1min buttons -->
     </div>
 
@@ -299,8 +297,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         //------------//
         // Page Setup //
         //------------//
-        // Hide the Pause/Resume button
-        document.getElementById("pause_resume_button").style.opacity = 0;
 
         // Setup initial layout
         document.getElementById("countdown_timer").style.color = rgb_array_to_string( TIMER_FONT_IDLE_COLOR );
@@ -316,6 +312,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         document.getElementById('amber_time_header').style.backgroundColor = rgb_array_to_string( AMBER_CARD_COLOR );
         document.getElementById('red_time_header'  ).style.backgroundColor = rgb_array_to_string( RED_CARD_COLOR   );
 
+        show_only_start_stop_button();
         add_short_break_button();
         add_screen_awake_reminder();
 
@@ -362,9 +359,42 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             }
         }
 
+        function show_only_start_stop_button() {
+            // Remove all elements from the div.
+            remove_all_elements_from_div( 'timer_start_stop_controls' );
+
+            const start_button  = document.createElement('button');
+            start_button.id = "start_stop_button";
+            start_button.className = "timer-buttons";
+            start_button.innerText = "Start";
+
+            // Add an event listener to the button
+            start_button.addEventListener('click', () => {
+                start_or_stop_timer( TIMER_MODE_START_OR_STOP );
+            });
+
+            // Append the button to the container
+            document.getElementById( 'timer_start_stop_controls' ).appendChild( start_button );
+        }
+
+        function show_start_stop_pause_button() {
+            const pause_button  = document.createElement('button');
+            pause_button.id = "pause_resume_button";
+            pause_button.className = "timer-buttons";
+            pause_button.innerText = "Pause";
+
+            // Add an event listener to the button
+            pause_button.addEventListener('click', () => {
+                pause_or_resume_timer();
+            });
+
+            // Append the button to the container
+            document.getElementById( 'timer_start_stop_controls' ).appendChild( pause_button );
+        }
+
         function add_plus_minus_buttons() {
             // Remove all elements from the div.
-            remove_all_elements_from_div( 'timer_controls' );
+            remove_all_elements_from_div( 'timer_plus_minus_controls' );
 
             // Create a button element
             const plus_button  = document.createElement('button');
@@ -389,15 +419,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             });
 
             // Append the button to the container
-            document.getElementById( 'timer_controls' ).appendChild(  plus_button );
-            document.getElementById( 'timer_controls' ).appendChild( text_minutes );
-            document.getElementById( 'timer_controls' ).appendChild( minus_button );
+            document.getElementById( 'timer_plus_minus_controls' ).appendChild(  plus_button );
+            document.getElementById( 'timer_plus_minus_controls' ).appendChild( text_minutes );
+            document.getElementById( 'timer_plus_minus_controls' ).appendChild( minus_button );
 
             update_minutes_plus_minus_text();
         }
 
         function remove_plus_minus_buttons() {
-            remove_all_elements_from_div( 'timer_controls' );
+            remove_all_elements_from_div( 'timer_plus_minus_controls' );
         }
 
         function add_short_break_button() {
@@ -440,14 +470,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             }
         }
 
-        document.getElementById("start_stop_button").onclick = function() {
-            start_or_stop_timer( TIMER_MODE_START_OR_STOP );
-        };
-
-        document.getElementById("pause_resume_button").onclick = function() {
-            pause_or_resume_timer();
-        };
-
         function restore_previous_timer() {
                 // Start the timer from where we left off.
                 // Select the radio dial for the previous speech, so the mode stays the same when the timer is stopped.
@@ -487,6 +509,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
                 start_or_stop_timer( TIMER_MODE_RESTORE_PREVIOUS );
         };
 
+        // todo move this above for the code refactor.
         document.getElementById("radio_table_topics").onclick = function() {
             updateHeaderAndTimingsDisplay( STR_TABLE_TOPICS );
         }
@@ -537,10 +560,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             document.getElementById("github_link").style.opacity     = 1;
 
             // Hide the Pause/Resume button
-            document.getElementById("pause_resume_button").style.opacity = 0;
+            show_only_start_stop_button();
         }
 
         function before_timer_start() {
+            // Show the Pause/Resume button
+            show_start_stop_pause_button();
+
             document.getElementById("start_stop_button").innerText   = "Stop";
             document.getElementById("pause_resume_button").innerText = "Pause";
             document.getElementById("total_time").style.color = rgb_array_to_string( TIMER_FONT_ACTIVE_COLOR );
@@ -559,9 +585,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             document.getElementById("list_of_timings").style.opacity = 0;
             document.getElementById("version_number").style.opacity  = 0;
             document.getElementById("github_link").style.opacity     = 0;
-
-            // Show the Pause/Resume button
-            document.getElementById("pause_resume_button").style.opacity = 1;
         }
 
         function color_fade_to( start_colour, end_colour, percent ) {
