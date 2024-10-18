@@ -199,7 +199,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 
     <br>
     <div id="version_number" class="center-all">
-        <p class="reminder-text">Version 3.0 on 17/10/24</p><!-- CHANGE THIS IN THE README TOO -->
+        <p class="reminder-text">Version 3.0 on 18/10/24</p><!-- CHANGE THIS IN THE README TOO -->
     </div>
 
     <div id="github_link" class="center-all">
@@ -319,6 +319,30 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         //-----------//
         // Functions //
         //-----------//
+
+        document.getElementById("radio_table_topics").onclick = function() {
+            updateHeaderAndTimingsDisplay( STR_TABLE_TOPICS );
+        }
+
+        document.getElementById("radio_icebreaker").onclick = function() {
+            updateHeaderAndTimingsDisplay( STR_ICEBREAKER );
+        }
+
+        document.getElementById("radio_speech").onclick = function() {
+            updateHeaderAndTimingsDisplay( STR_SPEECH );
+        }
+
+        document.getElementById("radio_evaluation").onclick = function() {
+            updateHeaderAndTimingsDisplay( STR_EVALUATION );
+        }
+
+        document.getElementById("radio_general_evaluator").onclick = function() {
+            updateHeaderAndTimingsDisplay( STR_GENERAL_EVALUATOR );
+        }
+
+        document.getElementById("radio_demo_mode").onclick = function() {
+            updateHeaderAndTimingsDisplay( STR_DEMO_MODE );
+        }
 
         function add_screen_awake_reminder() {
             // Remove all elements from the div.
@@ -508,31 +532,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
                 }
                 start_or_stop_timer( TIMER_MODE_RESTORE_PREVIOUS );
         };
-
-        // todo move this above for the code refactor.
-        document.getElementById("radio_table_topics").onclick = function() {
-            updateHeaderAndTimingsDisplay( STR_TABLE_TOPICS );
-        }
-
-        document.getElementById("radio_icebreaker").onclick = function() {
-            updateHeaderAndTimingsDisplay( STR_ICEBREAKER );
-        }
-
-        document.getElementById("radio_speech").onclick = function() {
-            updateHeaderAndTimingsDisplay( STR_SPEECH );
-        }
-
-        document.getElementById("radio_evaluation").onclick = function() {
-            updateHeaderAndTimingsDisplay( STR_EVALUATION );
-        }
-
-        document.getElementById("radio_general_evaluator").onclick = function() {
-            updateHeaderAndTimingsDisplay( STR_GENERAL_EVALUATOR );
-        }
-
-        document.getElementById("radio_demo_mode").onclick = function() {
-            updateHeaderAndTimingsDisplay( STR_DEMO_MODE );
-        }
 
         function after_timer_stop() {
             document.getElementById("countdown_timer").textContent = "0:00";
