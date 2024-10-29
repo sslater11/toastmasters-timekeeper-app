@@ -43,4 +43,4 @@ jobs:
         uses: actions/deploy-pages@v4
         with:
           publish_dir: ./
-          custom-index: ./toastmasters-timekeeper-app.html
+          custom-index: toastmasters-timekeeper-app.html
