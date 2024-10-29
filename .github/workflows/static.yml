@@ -38,12 +38,15 @@ jobs:
         with:
           # Upload entire repository
           path: '.'
+      - name: List files
+        run: ls -lah *
       - name: Rename app to index.html
         run: |
           mv toastmasters-timekeeper-app.html index.html
+      - name: List files
+        run: ls -lah *
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./
