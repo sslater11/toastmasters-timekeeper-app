@@ -38,9 +38,11 @@ jobs:
         with:
           # Upload entire repository
           path: '.'
+      - name: Rename app to index.html
+        run: |
+          mv toastmasters-timekeeper-app.html index.html
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
         with:
           publish_dir: ./
-          custom-index: toastmasters-timekeeper-app.html
