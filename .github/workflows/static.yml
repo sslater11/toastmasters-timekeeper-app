@@ -36,14 +36,12 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
-          path: '.'
+          files: |
+              - toastmasters-timekeeper-app.html
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          files: |
-              - toastmasters-timekeeper-app.html
       - name: Copy toastmasters-timekeeper-app to index.html
         run: cp ./toastmasters-timekeeper-app.html ./index.html
 
