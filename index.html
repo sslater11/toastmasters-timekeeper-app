@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<!--
+MIT License
+
+Copyright (c) 2024 Simon Slater - github.com/sslater11/toastmasters-timekeeper-app
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+-->
+
+<!--
+    Version number - See the div tag below called version_number.
+-->
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toastmasters Timekeeper</title>
+</head>
+<style>
+    .center-all {
+        display: flex;
+        justify-content: center;
+    }
+
+    .radio-group {
+        font-family:Arial, Helvetica, sans-serif;
+        font-size:0.75rem;
+        padding:0.21rem;
+        padding-left: 0rem;
+        padding-right: 0rem;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        z-index: 0;
+    }
+
+    label input[type="radio"] {
+        vertical-align: text-bottom;
+        margin: 0;
+        margin-right: -0.1rem;
+        padding:0 ;
+    }
+
+    .radio {
+        vertical-align: text-bottom;
+        margin-left: 0.35rem;
+        margin-right: 0.35rem;
+    }
+
+    table {
+        border-spacing: 0;
+        border-collapse: collapse;
+        margin-top:    1rem;
+        margin-bottom: 1rem;
+    }
+
+    td {
+        font-family:Arial, Helvetica, sans-serif;
+        font-size: 1rem;
+        text-align: center;
+        padding-left:  1rem;
+        padding-right: 1rem;
+
+        border-style: solid;
+        border-width: 10;
+        border-color: black;
+    }
+
+    .table-headers {
+        font-weight: bold;
+    }
+
+    .timer-buttons {
+        font-family:Arial, Helvetica, sans-serif;
+        font-size: 2rem;
+        white-space: pre; /* Preserve spaces for the +1min -1min text box */
+        margin-left: 0.25rem;
+        margin-right: 0.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .timer-session-buttons {
+        font-family:Arial, Helvetica, sans-serif;
+        font-size: 1.5rem;
+        margin-top: 0rem;
+        margin-bottom: 0rem;
+        margin-left: 0.25rem;
+        margin-right: 0.25rem;
+    }
+
+    .reminder-text {
+        font-family:Arial, Helvetica, sans-serif;
+        font-size: 0.75rem;
+        white-space: pre; /* Preserve spaces for the +1min -1min text box */
+        
+        padding:0rem;
+        margin: 0rem;
+        margin-bottom: 1rem;
+        color: rgb(90,90,90);
+    }
+    
+    .text-plus-minus {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 2rem;
+        white-space: pre; /* Preserve spaces for the +1min -1min text box */
+        padding: 0rem;
+        margin:  0rem;
+    }
+</style>
+<body>
+    <p id="header"             style="font-family:Arial, Helvetica, sans-serif;       font-size:2rem; padding:0rem; margin: 0rem;" align="center" >Table Topics</p>
+    <b><p id="countdown_timer" style="font-family: 'Courier New', Courier, monospace; font-size:8rem; padding:0rem; margin: 0rem;" align="center" >0:00</p></b>
+    <p id="total_time"         style="font-family:Arial, Helvetica, sans-serif;       font-size:2rem; padding:0rem; margin: 0rem; margin-bottom: 1rem;" align="center" >Total time:</p>
+
+    <div class="center-all" id="timer_start_stop_controls">
+    </div>
+
+    <b><div class="center-all" id="screen_awake_reminder_div">
+    </div></b>
+
+    <div id="timer_plus_minus_controls" class="center-all"></div>
+        <!-- for the +1min and -1min buttons -->
+    </div>
+
+    <div class="center-all" >
+        <div class="radio-group" id="radio_group_1">
+            <label class="radio">
+                <input type="radio" name="my_timer_radio" id="radio_table_topics" checked />
+                Table Topics
+            </label>
+            <label class="radio">
+                <input type="radio" name="my_timer_radio" id="radio_icebreaker" />
+                Icebreaker
+            </label>
+            <label class="radio">
+                <input type="radio" name="my_timer_radio" id="radio_speech" />
+                Speech
+            </lab/el>
+        </div>
+    </div>
+
+    <div class="center-all" >
+        <div class="radio-group" id="radio_group_2">
+            <label class="radio">
+                <input type="radio" name="my_timer_radio" id="radio_evaluation" />
+                Evaluation
+            </label>
+            <label class="radio">
+                <input type="radio" name="my_timer_radio" id="radio_general_evaluator" />
+                General Evaluator
+            </label>
+            <label class="radio">
+                <input type="radio" name="my_timer_radio" id="radio_demo_mode" />
+                Demo mode
+            </label>
+        </div>
+    </div>
+
+    <div class="center-all" >
+        <table id="table_of_times">
+            <tr class="table-headers">
+                <b>
+                <td id="green_time_header">Green</td>
+                <td id="amber_time_header">Amber</td>
+                <td id="red_time_header"  >Red</td>
+                </b>
+            </tr>
+            <tr>
+                <td id="green_time"></td>
+                <td id="amber_time"></td>
+                <td id="red_time"  ></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="other_timer_sessions" class="center-all" >
+    </div>
+
+    <div class="center-all" >
+        <div id="list_of_timings">
+        </div>
+    </div>
+
+    <br>
+    <div id="version_number" class="center-all">
+        <p class="reminder-text">Version 3.0 on 18/10/24</p><!-- CHANGE THIS IN THE README TOO -->
+    </div>
+
+    <div id="github_link" class="center-all">
+        <p class="reminder-text">https://github.com/sslater11/toastmasters-timekeeper-app</p>
+    </div>
+
+    <script>
+        const TIMER_MODE_START_OR_STOP    = 0;
+        const TIMER_MODE_RESTORE_PREVIOUS = 1;
+        const TIMER_MODE_SHORT_BREAK      = 2;
+
+        const STR_DEMO_MODE          = "Demo Mode";
+        const STR_TABLE_TOPICS       = "Table Topics";
+        const STR_ICEBREAKER         = "Icebreaker";
+        const STR_SPEECH             = "Speech";
+        const STR_EVALUATION         = "Evaluation";
+        const STR_GENERAL_EVALUATOR  = "General Evaluator";
+        const STR_SHORT_BREAK        = "Short Break";
+
+        const TABLE_TOPICS_GREEN_CARD = 1   * 60 * 1000;
+        const TABLE_TOPICS_AMBER_CARD = 1.5 * 60 * 1000;
+        const TABLE_TOPICS_RED_CARD   = 2   * 60 * 1000;
+
+        const DEMO_MODE_GREEN_CARD = 10000;
+        const DEMO_MODE_AMBER_CARD = 20000;
+        const DEMO_MODE_RED_CARD   = 30000;
+
+        const ICEBREAKER_GREEN_CARD = 4 * 60 * 1000 ;
+        const ICEBREAKER_AMBER_CARD = 5 * 60 * 1000 ;
+        const ICEBREAKER_RED_CARD   = 6 * 60 * 1000 ;
+
+        const SPEECH_GREEN_CARD = 5 * 60 * 1000;
+        const SPEECH_AMBER_CARD = 6 * 60 * 1000;
+        const SPEECH_RED_CARD   = 7 * 60 * 1000;
+
+        const EVALUATION_GREEN_CARD = 2   * 60 * 1000;
+        const EVALUATION_AMBER_CARD = 2.5 * 60 * 1000;
+        const EVALUATION_RED_CARD   = 3   * 60 * 1000;
+
+        const GENERAL_EVALUATOR_GREEN_CARD = 3 * 60 * 1000;
+        const GENERAL_EVALUATOR_AMBER_CARD = 4 * 60 * 1000;
+        const GENERAL_EVALUATOR_RED_CARD   = 5 * 60 * 1000;
+
+        const SHORT_BREAK_GREEN_CARD = 40 * 1000;
+        const SHORT_BREAK_AMBER_CARD = 50 * 1000;
+        const SHORT_BREAK_RED_CARD   = 60 * 1000;
+
+        const FPS = 30;
+
+        //const RED_CARD_FLASHING = "#bb0000";
+        //const GREEN_CARD_COLOR = "#00ff00";
+        //const AMBER_CARD_COLOR = "#ffaa00";
+        //const RED_CARD_COLOR   = "#ff0000";
+        //const IDLE_BACKGROUND_COLOR = "#ebbbff";
+        //const BLANK_BACKGROUND_COLOR = "#ebebeb";
+
+        const GREEN_CARD_COLOR          = [   0, 255, 0 ];
+        const AMBER_CARD_COLOR          = [ 255, 170, 0 ];
+        const RED_CARD_COLOR            = [ 255,   0, 0 ];
+        
+        const RED_CARD_FLASHING         = [  95,   0, 0 ];
+
+        const IDLE_BACKGROUND_COLOR     = [ 235, 187, 255 ];
+        const BLANK_BACKGROUND_COLOR    = [ 235, 235, 235 ];
+        const TIMER_FONT_IDLE_COLOR     = [   0,   0,   0 ];
+        const TIMER_FONT_ACTIVE_COLOR   = [   0,   0,   0 ];
+        const TIMER_FONT_FLASHING_COLOR = [ 235, 235, 235 ];
+
+        const COLOR_TRANSITION_IN_MILLIS          =  1000;
+        const DEMO_COLOR_TRANSITION_IN_MILLIS     =  5000;
+        const FLASHING_COLOR_TRANSITION_IN_MILLIS =  1000;
+        const START_FLASHING_AFTER_X_MILLIS       = 30000;
+
+        var has_timer_started = false;
+        var is_timer_paused   = false;
+        var is_demo_mode = false;
+
+        var all_timings = [];
+
+        var is_flashing_background_on = false; // Used to toggle between the two colors.
+        var last_flashing_card_time = 0;
+
+        var timer_started_at_time = 0;
+        var timer_stopped_at_time = 0;
+        var timer_paused_at_time  = 0;
+        var timer_resumed_at_time = 0;
+
+        var green_card = 0;
+        var amber_card = 0;
+        var red_card   = 0;
+        var speech_header_as_str = "";
+        var minutes_plus_minus = 0;
+        var does_a_previous_session_exist = false;
+
+        //------------//
+        // Page Setup //
+        //------------//
+
+        // Setup initial layout
+        document.getElementById("countdown_timer").style.color = rgb_array_to_string( TIMER_FONT_IDLE_COLOR );
+        document.getElementById("total_time").style.color = rgb_array_to_string( TIMER_FONT_IDLE_COLOR );
+        document.body.style.backgroundColor = rgb_array_to_string( IDLE_BACKGROUND_COLOR );
+
+        document.getElementById('header').textContent = "Table Topics";
+        document.getElementById('green_time').textContent = milliseconds_to_time_str( TABLE_TOPICS_GREEN_CARD );
+        document.getElementById('amber_time').textContent = milliseconds_to_time_str( TABLE_TOPICS_AMBER_CARD );
+        document.getElementById('red_time'  ).textContent = milliseconds_to_time_str( TABLE_TOPICS_RED_CARD   );
+
+        document.getElementById('green_time_header').style.backgroundColor = rgb_array_to_string( GREEN_CARD_COLOR );
+        document.getElementById('amber_time_header').style.backgroundColor = rgb_array_to_string( AMBER_CARD_COLOR );
+        document.getElementById('red_time_header'  ).style.backgroundColor = rgb_array_to_string( RED_CARD_COLOR   );
+
+        show_only_start_stop_button();
+        add_short_break_button();
+        add_screen_awake_reminder();
+
+        //-----------//
+        // Functions //
+        //-----------//
+
+        document.getElementById("radio_table_topics").onclick = function() {
+            updateHeaderAndTimingsDisplay( STR_TABLE_TOPICS );
+        }
+
+        document.getElementById("radio_icebreaker").onclick = function() {
+            updateHeaderAndTimingsDisplay( STR_ICEBREAKER );
+        }
+
+        document.getElementById("radio_speech").onclick = function() {
+            updateHeaderAndTimingsDisplay( STR_SPEECH );
+        }
+
+        document.getElementById("radio_evaluation").onclick = function() {
+            updateHeaderAndTimingsDisplay( STR_EVALUATION );
+        }
+
+        document.getElementById("radio_general_evaluator").onclick = function() {
+            updateHeaderAndTimingsDisplay( STR_GENERAL_EVALUATOR );
+        }
+
+        document.getElementById("radio_demo_mode").onclick = function() {
+            updateHeaderAndTimingsDisplay( STR_DEMO_MODE );
+        }
+
+        function add_screen_awake_reminder() {
+            // Remove all elements from the div.
+            remove_all_elements_from_div( 'screen_awake_reminder_div' );
+            const reminder_element = document.createElement('span');
+
+            reminder_element.id         = "screen_awake_reminder";
+            reminder_element.className  = "reminder-text";
+
+            reminder_element.addEventListener('click', () => {
+                update_screen_awake_reminder();
+            });
+
+            // Append the button to the container
+            document.getElementById( 'screen_awake_reminder_div' ).appendChild( reminder_element );
+
+            update_screen_awake_reminder();
+        }
+
+        function remove_screen_awake_reminder() {
+            // Remove all elements from the div.
+            remove_all_elements_from_div( 'screen_awake_reminder_div' );
+        }
+
+        function update_screen_awake_reminder() {
+            screen_awake_element = document.getElementById("screen_awake_reminder");
+            if( screen_awake_element !== null | screen_awake_element !== undefined ) {
+                const android_text = "Android:\n\tAndroid Settings > Display > Screen Timeout\n\n\tSettings > Type \"Screen Timeout\" into the search bar.\n\n\tIf you have 'caffeine' in your quick tiles,\n\ttapping this will keep the screen awake\n\tfor the length of time shown on the tile.";
+                const iphone_text  = "iPhone:\n\tSettings > Display & Brightness > Auto-Lock.\n\tSelect \"Never\" to keep the screen on.";
+                const screen_awake_remember_text = "Remember to keep the screen awake. Tap for more info.";
+                const screen_awake_settings_text = "How to keep the screen awake:\n\n" + android_text + "\n\n" + iphone_text;
+
+                if ( screen_awake_element.textContent == screen_awake_remember_text ) { 
+                    screen_awake_element.textContent = screen_awake_settings_text;
+                } else {
+                    screen_awake_element.textContent = screen_awake_remember_text;
+                }
+            }
+        }
+
+        function show_only_start_stop_button() {
+            // Remove all elements from the div.
+            remove_all_elements_from_div( 'timer_start_stop_controls' );
+
+            const start_button  = document.createElement('button');
+            start_button.id = "start_stop_button";
+            start_button.className = "timer-buttons";
+            start_button.innerText = "Start";
+
+            // Add an event listener to the button
+            start_button.addEventListener('click', () => {
+                start_or_stop_timer( TIMER_MODE_START_OR_STOP );
+            });
+
+            // Append the button to the container
+            document.getElementById( 'timer_start_stop_controls' ).appendChild( start_button );
+        }
+
+        function show_start_stop_pause_button() {
+            const pause_button  = document.createElement('button');
+            pause_button.id = "pause_resume_button";
+            pause_button.className = "timer-buttons";
+            pause_button.innerText = "Pause";
+
+            // Add an event listener to the button
+            pause_button.addEventListener('click', () => {
+                pause_or_resume_timer();
+            });
+
+            // Append the button to the container
+            document.getElementById( 'timer_start_stop_controls' ).appendChild( pause_button );
+        }
+
+        function add_plus_minus_buttons() {
+            // Remove all elements from the div.
+            remove_all_elements_from_div( 'timer_plus_minus_controls' );
+
+            // Create a button element
+            const plus_button  = document.createElement('button');
+            const minus_button = document.createElement('button');
+            const text_minutes = document.createElement('span');
+
+            text_minutes.id        = "text_plus_minus";
+            text_minutes.className = "text-plus-minus"
+
+            plus_button.innerText  = '+1 min';
+            minus_button.innerText = '-1 min';
+            plus_button.className  = "timer-buttons"
+            minus_button.className = "timer-buttons"
+            text_minutes.className = "text-plus-minus"
+
+            // Add an event listener to the button
+            plus_button.addEventListener('click', () => {
+                add_x_seconds_to_speakers_time(  60 );
+            });
+            minus_button.addEventListener('click', () => {
+                add_x_seconds_to_speakers_time( -60 );
+            });
+
+            // Append the button to the container
+            document.getElementById( 'timer_plus_minus_controls' ).appendChild(  plus_button );
+            document.getElementById( 'timer_plus_minus_controls' ).appendChild( text_minutes );
+            document.getElementById( 'timer_plus_minus_controls' ).appendChild( minus_button );
+
+            update_minutes_plus_minus_text();
+        }
+
+        function remove_plus_minus_buttons() {
+            remove_all_elements_from_div( 'timer_plus_minus_controls' );
+        }
+
+        function add_short_break_button() {
+            // Remove all elements from the div.
+            remove_all_elements_from_div('other_timer_sessions')
+
+            // Create a button element
+            const short_break_button            = document.createElement('button');
+            short_break_button.innerText     = 'One Minute';
+            short_break_button.className     = "timer-session-buttons"
+
+            // Add an event listener to the button
+            short_break_button.addEventListener('click', () => {
+                start_or_stop_timer( TIMER_MODE_SHORT_BREAK );
+            });
+
+            // Append the button to the container
+            document.getElementById( 'other_timer_sessions' ).appendChild( short_break_button );
+
+            if( does_a_previous_session_exist ) {
+                const restore_previous_timer_button = document.createElement('button');
+                restore_previous_timer_button.innerText = 'Restore\nPrevious';
+                restore_previous_timer_button.className = "timer-session-buttons"
+                restore_previous_timer_button.addEventListener('click', () => {
+                    restore_previous_timer();
+                });
+                document.getElementById( 'other_timer_sessions' ).appendChild( restore_previous_timer_button );
+            }
+        }
+
+        function remove_short_break_button() {
+            remove_all_elements_from_div('other_timer_sessions');
+        }
+
+        function remove_all_elements_from_div( div_id ) {
+            var my_div = document.getElementById( div_id );
+
+            while( my_div.firstChild ) {
+                my_div.removeChild( my_div.firstChild );
+            }
+        }
+
+        function restore_previous_timer() {
+                // Start the timer from where we left off.
+                // Select the radio dial for the previous speech, so the mode stays the same when the timer is stopped.
+                switch( speech_header_as_str ) {
+                    case STR_DEMO_MODE:
+                        is_demo_mode = true;
+                        document.getElementById( "radio_demo_mode" ).checked  = true;
+                        break;
+
+                    case STR_TABLE_TOPICS:
+                        document.getElementById("radio_table_topics").checked = true;
+                        break;
+
+                    case STR_ICEBREAKER:
+                        document.getElementById("radio_icebreaker").checked   = true;
+                        break;
+
+                    case STR_SPEECH:
+                        document.getElementById("radio_speech").checked       = true;
+                        break;
+
+                    case STR_EVALUATION:
+                        document.getElementById("radio_evaluation").checked   = true;
+                        break;
+
+                    case STR_GENERAL_EVALUATOR:
+                        document.getElementById("radio_general_evaluator").checked = true;
+                        break;
+
+                    case STR_SHORT_BREAK:
+                        // Do nothing.
+                        break;
+
+                    default:
+                        console.log("Should never reach this. Oh my cheeses.");
+                }
+                start_or_stop_timer( TIMER_MODE_RESTORE_PREVIOUS );
+        };
+
+        function after_timer_stop() {
+            document.getElementById("countdown_timer").textContent = "0:00";
+            document.getElementById("countdown_timer").style.color = rgb_array_to_string( TIMER_FONT_IDLE_COLOR );
+
+            document.getElementById("total_time").style.color = rgb_array_to_string( TIMER_FONT_IDLE_COLOR );
+            document.body.style.backgroundColor = rgb_array_to_string( IDLE_BACKGROUND_COLOR );
+
+            document.getElementById("start_stop_button").innerText   = "Start";
+            document.getElementById("pause_resume_button").innerText = "Pause";
+
+            document.getElementById("radio_table_topics").disabled      = false;
+            document.getElementById("radio_icebreaker").disabled        = false;
+            document.getElementById("radio_speech").disabled            = false;
+            document.getElementById("radio_evaluation").disabled        = false;
+            document.getElementById("radio_general_evaluator").disabled = false;
+            document.getElementById("radio_demo_mode").disabled         = false;
+
+            // Show elements
+            document.getElementById("radio_group_1").style.opacity   = 1;
+            document.getElementById("radio_group_2").style.opacity   = 1;
+            document.getElementById("table_of_times").style.opacity  = 1;
+            document.getElementById("list_of_timings").style.opacity = 1;
+            document.getElementById("version_number").style.opacity  = 1;
+            document.getElementById("github_link").style.opacity     = 1;
+
+            // Hide the Pause/Resume button
+            show_only_start_stop_button();
+        }
+
+        function before_timer_start() {
+            // Show the Pause/Resume button
+            show_start_stop_pause_button();
+
+            document.getElementById("start_stop_button").innerText   = "Stop";
+            document.getElementById("pause_resume_button").innerText = "Pause";
+            document.getElementById("total_time").style.color = rgb_array_to_string( TIMER_FONT_ACTIVE_COLOR );
+            
+            document.getElementById("radio_table_topics").disabled      = true;
+            document.getElementById("radio_icebreaker").disabled        = true;
+            document.getElementById("radio_speech").disabled            = true;
+            document.getElementById("radio_evaluation").disabled        = true;
+            document.getElementById("radio_general_evaluator").disabled = true;
+            document.getElementById("radio_demo_mode").disabled         = true;
+
+            // Hide elements.
+            document.getElementById("radio_group_1").style.opacity   = 0;
+            document.getElementById("radio_group_2").style.opacity   = 0;
+            document.getElementById("table_of_times").style.opacity  = 0;
+            document.getElementById("list_of_timings").style.opacity = 0;
+            document.getElementById("version_number").style.opacity  = 0;
+            document.getElementById("github_link").style.opacity     = 0;
+        }
+
+        function color_fade_to( start_colour, end_colour, percent ) {
+            result_r = (1 - percent ) * start_colour[0] + percent * end_colour[0]
+            result_g = (1 - percent ) * start_colour[1] + percent * end_colour[1]
+            result_b = (1 - percent ) * start_colour[2] + percent * end_colour[2]
+
+            return [result_r, result_g, result_b ];
+        }
+
+        function rgb_array_to_string( rgb ) {
+            return "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")"
+        }
+
+        function get_difference_in_time_as_percentage( start_time, end_time, transition_time) {
+            end_time      = Math.abs( end_time );
+            start_time    = Math.abs( start_time );
+            transition_time = Math.abs( transition_time );
+
+            if( start_time > end_time ) {
+                // Programmer passed variables in wrong order, so return 1.
+                console.log("Warning: start_time is greater than end_time")
+                return 1;
+            }
+            if( start_time >= (end_time - transition_time ) ) {
+                var delta = Math.abs(end_time - start_time);
+                var result = 1 - (delta / transition_time );
+
+                return result;
+            }
+            else {
+                return 0;
+            }
+        }
+
+        /**
+         * Increase the speaker's amount of time available by x seconds.
+         * You can pass a negative value to subtract from the time.
+         */
+        async function add_x_seconds_to_speakers_time( seconds ) {
+            // Add a minute to when the card colors should change.
+            green_card += seconds * 1000;
+            amber_card += seconds * 1000;
+            red_card   += seconds * 1000;
+
+            minutes_plus_minus += (seconds / 60);
+            update_minutes_plus_minus_text();
+        }
+
+        async function pause_or_resume_timer() {
+            // Toggle pausing and resuming the timer.
+
+            // For the rest of the pause handling code, see ther start_stop_timer() function.
+            // The start_stop_timer() function has a 'while loop', which is how the timer updates.
+
+            if( is_timer_paused ) {
+                // Timer will now be resumed.
+                is_timer_paused = ! is_timer_paused;
+
+                timer_resumed_at_time = Date.now();
+
+                // Need to update the timer, because if we don't it would think we have still been running.
+                let time_delta = timer_resumed_at_time - timer_paused_at_time;
+                timer_started_at_time = timer_started_at_time + time_delta;
+                timer_paused_at_time = 0;
+
+                // We will be resuming the timer, so change this button to "Pause", so the user can then pause it again.
+                document.getElementById("pause_resume_button").innerText = "Pause";
+
+                // Set the alpha for the text to 100%
+                let new_color = get_colour_with_new_alpha( document.getElementById("countdown_timer").style.color, 1);
+                document.getElementById("countdown_timer").style.color = new_color;
+            } else {
+                // Need to update the timer, because if we don't it would think we have still been running.
+                // Timer will now be paused.
+                is_timer_paused = ! is_timer_paused;
+
+                timer_resumed_at_time = 0;
+                timer_paused_at_time = Date.now();
+
+                // We will be pausing the timer, so change this button to "Resume", so the user can then resume it.
+                document.getElementById("pause_resume_button").innerText = "Resume";
+            }
+        }
+
+        async function start_or_stop_timer( timer_mode ) {
+            does_a_previous_session_exist = true;
+
+            if( has_timer_started ) {
+                // Stop the timer.
+                timer_stopped_at_time = Date.now();
+                has_timer_started = false;
+                is_timer_paused   = false;
+                is_demo_mode      = false;
+
+                document.getElementById("pause_resume_button").innerText = "Pause";
+                remove_plus_minus_buttons();
+                add_short_break_button();
+                add_screen_awake_reminder()
+
+                if( speech_header_as_str == STR_SHORT_BREAK ) {
+                    // Reset the header to the user's choice.
+                    updateHeaderOnly();
+                }
+
+                return;
+            } else {
+                // Start the timer.
+                has_timer_started = true;
+                is_timer_paused = false;
+
+                remove_short_break_button();
+                remove_screen_awake_reminder();
+
+                if( (timer_mode == TIMER_MODE_START_OR_STOP) || (timer_mode == TIMER_MODE_SHORT_BREAK) ) {
+                    minutes_plus_minus = 0;
+                }
+                add_plus_minus_buttons();
+
+                //// Scroll to the top of the screen after pressing the start button.
+                // Commented out as it doesn't work on mobile but works on desktop :(.
+                //const document_width = document.documentElement.scrollWidth;
+                //const window_width = window.innerWidth;
+
+                //// Calculate the X coordinate to scroll to (center of the page)
+                //const scroll_x = (document_width - window_width) / 2;
+
+                //// Scroll to the calculated X position
+                //window.scrollTo(100, 100);
+                ////window.scrollTo({
+                ////    top: 0,
+                ////    left: scroll_x,
+                ////    behavior: 'smooth'
+                ////});
+            }
+
+            before_timer_start();
+            let time_delta = timer_stopped_at_time;
+
+            if( timer_mode == TIMER_MODE_START_OR_STOP ) {
+                time_delta = 0;
+
+                radio_id = document.querySelector('input[name="my_timer_radio"]:checked').id;
+                switch( radio_id ) {
+                    case "radio_demo_mode":
+                        is_demo_mode = true;
+                        green_card = DEMO_MODE_GREEN_CARD;
+                        amber_card = DEMO_MODE_AMBER_CARD;
+                        red_card   = DEMO_MODE_RED_CARD;
+                        speech_header_as_str = STR_DEMO_MODE;
+                        break;
+
+                    case "radio_table_topics":
+                        green_card = TABLE_TOPICS_GREEN_CARD;
+                        amber_card = TABLE_TOPICS_AMBER_CARD;
+                        red_card   = TABLE_TOPICS_RED_CARD;
+                        speech_header_as_str = STR_TABLE_TOPICS;
+                        break;
+
+                    case "radio_icebreaker":
+                        green_card = ICEBREAKER_GREEN_CARD;
+                        amber_card = ICEBREAKER_AMBER_CARD;
+                        red_card   = ICEBREAKER_RED_CARD;
+                        speech_header_as_str = STR_ICEBREAKER;
+                        break;
+
+                    case "radio_speech":
+                        green_card = SPEECH_GREEN_CARD;
+                        amber_card = SPEECH_AMBER_CARD;
+                        red_card   = SPEECH_RED_CARD;
+                        speech_header_as_str = STR_SPEECH;
+                        break;
+
+                    case "radio_evaluation":
+                        green_card = EVALUATION_GREEN_CARD;
+                        amber_card = EVALUATION_AMBER_CARD;
+                        red_card   = EVALUATION_RED_CARD;
+                        speech_header_as_str = STR_EVALUATION;
+                        break;
+
+                    case "radio_general_evaluator":
+                        green_card = GENERAL_EVALUATOR_GREEN_CARD;
+                        amber_card = GENERAL_EVALUATOR_AMBER_CARD;
+                        red_card   = GENERAL_EVALUATOR_RED_CARD;
+                        speech_header_as_str = STR_GENERAL_EVALUATOR;
+                        break;
+
+                    default:
+                        console.log("No option selected. This should never happen.")
+                }
+
+                timer_started_at_time = Date.now();
+                last_flashing_card_time = 0;
+                is_flashing_background_on = false;
+            } else if( timer_mode == TIMER_MODE_RESTORE_PREVIOUS ) {
+                    // Need to update the timer, because if we don't it would think we have still been running.
+                    let time_delta = Date.now() - timer_stopped_at_time;
+                    timer_started_at_time = timer_started_at_time + time_delta;
+                    timer_stopped_at_time = 0;
+
+                    // Display the previous timer's heading.
+                    document.getElementById('header').textContent = speech_header_as_str;
+                    update_minutes_plus_minus_text();
+            } else if( timer_mode == TIMER_MODE_SHORT_BREAK ) {
+                green_card = SHORT_BREAK_GREEN_CARD;
+                amber_card = SHORT_BREAK_AMBER_CARD;
+                red_card   = SHORT_BREAK_RED_CARD;
+                speech_header_as_str = STR_SHORT_BREAK;
+                document.getElementById('header').textContent = speech_header_as_str;
+
+                timer_started_at_time = Date.now();
+                last_flashing_card_time = 0;
+                is_flashing_background_on = false;
+            }
+            else {
+                console.log("Yeah this shouldn't happen... You need to investigate it I guess...")
+            }
+            while( has_timer_started ) {
+                if( is_timer_paused ) {
+                    // Timer paused.
+                    // Updating the screen allows us to change color whilst
+                    // the timer is paused and we are pressing +1min and -1min buttons.
+                    updateScreen( time_delta );
+
+                    // sleep one liner - an easy way to do FPS.
+                    await new Promise(r => setTimeout(r, 1000 / FPS));
+                    continue;
+                } else {
+                    // Timer not paused.
+                    let current_time = Date.now();
+                    if( is_demo_mode == true ) {
+                        if( time_delta > ( red_card + START_FLASHING_AFTER_X_MILLIS ) ) {
+                            // Slow the timer down to normal speed during the background flashing mode.
+                            time_delta = current_time - timer_started_at_time;
+                        }
+                        else {
+                            // Makes the countdown timer go faster for the demo.
+                            time_delta += 300;
+                            timer_started_at_time = Date.now() - time_delta;
+                        }
+                    } else {
+                        time_delta = current_time - timer_started_at_time;
+                    }
+
+                    updateScreen( time_delta );
+
+                    // sleep one liner - an easy way to do FPS.
+                    await new Promise(r => setTimeout(r, 1000 / FPS));
+                }
+            }
+            all_timings = all_timings.concat( [[speech_header_as_str, milliseconds_to_time_str( time_delta, true ) ]] );
+            generate_timings_table();
+            after_timer_stop();
+        }
+
+        function updateHeaderAndTimingsDisplay( speech_header ) {
+            switch( speech_header ) {
+                case STR_DEMO_MODE:
+                    document.getElementById('header').textContent = STR_DEMO_MODE;
+                    document.getElementById('green_time').textContent = milliseconds_to_time_str( DEMO_MODE_GREEN_CARD, true );
+                    document.getElementById('amber_time').textContent = milliseconds_to_time_str( DEMO_MODE_AMBER_CARD, true );
+                    document.getElementById('red_time').textContent   = milliseconds_to_time_str( DEMO_MODE_RED_CARD  , true );
+                    break;
+
+                case STR_TABLE_TOPICS:
+                    document.getElementById('header').textContent = STR_TABLE_TOPICS;
+                    document.getElementById('green_time').textContent = milliseconds_to_time_str( TABLE_TOPICS_GREEN_CARD );
+                    document.getElementById('amber_time').textContent = milliseconds_to_time_str( TABLE_TOPICS_AMBER_CARD );
+                    document.getElementById('red_time').textContent   = milliseconds_to_time_str( TABLE_TOPICS_RED_CARD );
+                    break;
+
+                case STR_ICEBREAKER:
+                    document.getElementById('header').textContent = STR_ICEBREAKER;
+                    document.getElementById('green_time').textContent = milliseconds_to_time_str( ICEBREAKER_GREEN_CARD );
+                    document.getElementById('amber_time').textContent = milliseconds_to_time_str( ICEBREAKER_AMBER_CARD );
+                    document.getElementById('red_time').textContent   = milliseconds_to_time_str( ICEBREAKER_RED_CARD );
+                    break;
+
+                case STR_SPEECH:
+                    document.getElementById('header').textContent = STR_SPEECH;
+                    document.getElementById('green_time').textContent = milliseconds_to_time_str( SPEECH_GREEN_CARD );
+                    document.getElementById('amber_time').textContent = milliseconds_to_time_str( SPEECH_AMBER_CARD );
+                    document.getElementById('red_time').textContent   = milliseconds_to_time_str( SPEECH_RED_CARD );
+                    break;
+
+                case STR_EVALUATION:
+                    document.getElementById('header').textContent = STR_EVALUATION;
+                    document.getElementById('green_time').textContent = milliseconds_to_time_str( EVALUATION_GREEN_CARD, true );
+                    document.getElementById('amber_time').textContent = milliseconds_to_time_str( EVALUATION_AMBER_CARD, true );
+                    document.getElementById('red_time').textContent   = milliseconds_to_time_str( EVALUATION_RED_CARD  , true );
+                    break;
+
+                case STR_GENERAL_EVALUATOR:
+                    document.getElementById('header').textContent = STR_GENERAL_EVALUATOR;
+                    document.getElementById('green_time').textContent = milliseconds_to_time_str( GENERAL_EVALUATOR_GREEN_CARD, true );
+                    document.getElementById('amber_time').textContent = milliseconds_to_time_str( GENERAL_EVALUATOR_AMBER_CARD, true );
+                    document.getElementById('red_time').textContent   = milliseconds_to_time_str( GENERAL_EVALUATOR_RED_CARD  , true );
+                    break;
+
+                case STR_SHORT_BREAK:
+                    document.getElementById('header').textContent = STR_SHORT_BREAK;
+                    document.getElementById('green_time').textContent = milliseconds_to_time_str( SHORT_BREAK_GREEN_CARD, true );
+                    document.getElementById('amber_time').textContent = milliseconds_to_time_str( SHORT_BREAK_AMBER_CARD, true );
+                    document.getElementById('red_time').textContent   = milliseconds_to_time_str( SHORT_BREAK_RED_CARD  , true );
+                    break;
+                default:
+                    console.log("oh no, not another bug");
+            }
+        }
+
+        function updateHeaderOnly() {
+            radio_id = document.querySelector('input[name="my_timer_radio"]:checked').id;
+            switch( radio_id ) {
+                case "radio_demo_mode":
+                    document.getElementById('header').textContent = STR_DEMO_MODE;
+                    break;
+
+                case "radio_table_topics":
+                    document.getElementById('header').textContent = STR_TABLE_TOPICS;
+                    break;
+
+                case "radio_icebreaker":
+                    document.getElementById('header').textContent = STR_ICEBREAKER;
+                    break;
+
+                case "radio_speech":
+                    document.getElementById('header').textContent = STR_SPEECH;
+                    break;
+
+                case "radio_evaluation":
+                    document.getElementById('header').textContent = STR_EVALUATION;
+                    break;
+
+                case "radio_general_evaluator":
+                    document.getElementById('header').textContent = STR_GENERAL_EVALUATOR;
+                    break;
+
+                default:
+                    console.log("Buggy bug: No option selected. This should never happen.")
+            }
+
+        }
+
+        function update_minutes_plus_minus_text() {
+            if( minutes_plus_minus > 0 ){
+                document.getElementById("text_plus_minus").textContent = "+" + minutes_plus_minus;
+            } else if( minutes_plus_minus == 0 ){
+                document.getElementById("text_plus_minus").textContent = "  ";
+            } else {
+                document.getElementById("text_plus_minus").textContent = minutes_plus_minus;
+            }
+        }
+
+        // Function to convert RGB to RGBA with a new alpha value
+        function get_colour_with_new_alpha(color, alpha) {
+            // Match the RGB values in the string.
+            const rgb_values = color.match(/\d+/g);
+    
+            if (rgb_values) {
+                // Create an RGBA string
+                return `rgba(${rgb_values[0]}, ${rgb_values[1]}, ${rgb_values[2]}, ${alpha})`;
+            }
+
+            // Return the original color if it doesn't match.
+            return color;
+        }
+
+        /**
+         * This will update the screen, changing colors, all depending on the time remaining.
+         */
+        function updateScreen( time_delta ) {
+            let time_str = milliseconds_to_time_str( time_delta, false );
+            let countdown = red_card - time_delta + 1000; // add 1000 milliseconds, because the maths in milliseconds_to_time_str() rounds, which gives us an off by 1 error(one second).
+            let countdown_str = milliseconds_to_time_str( countdown, false );
+            document.getElementById('countdown_timer').textContent = countdown_str;
+            document.getElementById('total_time').textContent = "Total time: " + time_str;
+
+            if( (time_delta >= (red_card + START_FLASHING_AFTER_X_MILLIS)) ) {
+                // Flashing red card
+                if( time_delta > (last_flashing_card_time + FLASHING_COLOR_TRANSITION_IN_MILLIS) ) {
+                    is_flashing_background_on = ! is_flashing_background_on;
+                    last_flashing_card_time = time_delta;
+                }
+
+                let percentage = get_difference_in_time_as_percentage( time_delta, last_flashing_card_time + FLASHING_COLOR_TRANSITION_IN_MILLIS, FLASHING_COLOR_TRANSITION_IN_MILLIS );
+                let background_rgb = "";
+                let font_rgb = "";
+                if( is_flashing_background_on ) {
+                    background_rgb = color_fade_to( RED_CARD_COLOR,    RED_CARD_FLASHING, percentage );
+                    font_rgb       = color_fade_to( TIMER_FONT_ACTIVE_COLOR,   TIMER_FONT_FLASHING_COLOR, percentage );
+                } else {
+                    background_rgb = color_fade_to( RED_CARD_FLASHING, RED_CARD_COLOR,    percentage );
+                    font_rgb       = color_fade_to( TIMER_FONT_FLASHING_COLOR, TIMER_FONT_ACTIVE_COLOR,   percentage );
+                    
+                }
+
+                document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
+                document.getElementById("countdown_timer").style.color = rgb_array_to_string( font_rgb );
+                document.getElementById("total_time").style.color = rgb_array_to_string( font_rgb );
+            } else if( time_delta >= red_card ) {
+                document.body.style.backgroundColor = rgb_array_to_string( RED_CARD_COLOR );
+                document.getElementById("total_time").style.color      = rgb_array_to_string( TIMER_FONT_ACTIVE_COLOR );
+                document.getElementById("countdown_timer").style.color = rgb_array_to_string( TIMER_FONT_ACTIVE_COLOR );
+            } else if( time_delta >= amber_card ) {
+                // Amber card to red card
+                let percentage = get_difference_in_time_as_percentage( time_delta, red_card, COLOR_TRANSITION_IN_MILLIS )
+                let background_rgb = color_fade_to( AMBER_CARD_COLOR, RED_CARD_COLOR, percentage );
+                document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
+                document.getElementById("total_time").style.color      = rgb_array_to_string( TIMER_FONT_ACTIVE_COLOR );
+                document.getElementById("countdown_timer").style.color = rgb_array_to_string( TIMER_FONT_ACTIVE_COLOR );
+            } else if( time_delta >= green_card ) {
+                // Green card to amber card
+                let percentage = get_difference_in_time_as_percentage( time_delta, amber_card, COLOR_TRANSITION_IN_MILLIS )
+                let background_rgb = color_fade_to( GREEN_CARD_COLOR, AMBER_CARD_COLOR, percentage );
+                document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
+                document.getElementById("total_time").style.color      = rgb_array_to_string( TIMER_FONT_ACTIVE_COLOR );
+                document.getElementById("countdown_timer").style.color = rgb_array_to_string( TIMER_FONT_ACTIVE_COLOR );
+            } else if ( time_delta >= 0) {
+                // Blank card to green card
+                let percentage = get_difference_in_time_as_percentage( time_delta, green_card, COLOR_TRANSITION_IN_MILLIS )
+                let background_rgb = color_fade_to( BLANK_BACKGROUND_COLOR, GREEN_CARD_COLOR, percentage );
+                document.body.style.backgroundColor = rgb_array_to_string( background_rgb );
+                document.getElementById("total_time").style.color      = rgb_array_to_string( TIMER_FONT_ACTIVE_COLOR );
+                document.getElementById("countdown_timer").style.color = rgb_array_to_string( TIMER_FONT_ACTIVE_COLOR );
+            } else {
+
+                console.log("should never reach this condition - time_delta could be negative?  time_delta: " + time_delta );
+                    document.body.style.backgroundColor = rgb_array_to_string( IDLE_BACKGROUND_COLOR );
+            }
+
+            // Flash the numbers whilst paused.
+            if( is_timer_paused ) {
+                let time_delta_since_paused = Date.now() - timer_paused_at_time;
+                let difference = time_delta_since_paused % (FLASHING_COLOR_TRANSITION_IN_MILLIS);
+                let is_flashing_whilst_paused_on = false;
+
+                if( (time_delta_since_paused % (FLASHING_COLOR_TRANSITION_IN_MILLIS *2)) > FLASHING_COLOR_TRANSITION_IN_MILLIS ) {
+                    is_flashing_whilst_paused_on = true;
+                } else {
+                    is_flashing_whilst_paused_on = false;
+                }
+
+                let percentage = get_difference_in_time_as_percentage( time_delta_since_paused, difference + time_delta_since_paused, FLASHING_COLOR_TRANSITION_IN_MILLIS )
+                if( is_flashing_whilst_paused_on ) {
+                    percentage = 1-percentage; // Invert the percentage to fade the color the opposite way.
+                }
+                let new_color = get_colour_with_new_alpha( document.getElementById("countdown_timer").style.color, percentage);
+                document.getElementById("total_time").style.color      = new_color;
+                document.getElementById("countdown_timer").style.color = new_color;
+            }
+        }
+
+        function generate_timings_table() {
+            // Remove any old tables from previous runs.
+            remove_all_elements_from_div('list_of_timings');
+            var table_div = document.getElementById('list_of_timings');
+
+            // Create a new table.
+            var table = document.createElement('TABLE');
+            var table_body = document.createElement('TBODY');
+            table.appendChild(table_body);
+
+            // Add the headings to the table.
+            var heading_tr = document.createElement('TR');
+            heading_tr.className = "table-headers";
+            table_body.appendChild( heading_tr );
+
+            var heading_1 = document.createElement('TD');
+            var heading_2 = document.createElement('TD');
+            var heading_3 = document.createElement('TD');
+
+            heading_1.appendChild( document.createTextNode( "Index" ) );
+            heading_2.appendChild( document.createTextNode( "Speech Type" ) );
+            heading_3.appendChild( document.createTextNode( "Time" ) );
+
+            heading_tr.appendChild(heading_1);
+            heading_tr.appendChild(heading_2);
+            heading_tr.appendChild(heading_3);
+
+            // Add all timings to the table.
+            for (var i = 0; i < all_timings.length; i++) {
+                var tr = document.createElement('TR');
+                table_body.appendChild(tr);
+
+                var td_1 = document.createElement('TD');
+                var td_2 = document.createElement('TD');
+                var td_3 = document.createElement('TD');
+
+                td_1.appendChild( document.createTextNode("" + (i+1) ) );
+                td_2.appendChild( document.createTextNode( all_timings[i][0] ) );
+                td_3.appendChild( document.createTextNode( all_timings[i][1] ) );
+
+                tr.appendChild(td_1);
+                tr.appendChild(td_2);
+                tr.appendChild(td_3);
+            }
+
+            // Add table to our div tag.
+            table_div.appendChild( table );
+        }
+
+        //function convert_millis_to_seconds( time_in_millis_1, time_in_millis_2 ) {
+        //    var seconds = 0;
+        //    if( time_in_millis_1 > 0 ) {
+        //        var seconds = Math.floor(time_in_millis_1 / 1000);
+        //        console.log("Time in seconds: " + seconds );
+        //    } else {
+        //        var seconds = Math.ceil(time_in_millis_1 / 1000);
+        //        console.log("Time in seconds: " + seconds );
+        //    }
+
+        //    return seconds;
+        //}
+        //
+        //function areTimesTheSameLengthInSeconds( time_in_millis_1, time_in_millis_2 ) {
+        //    var t1 = 0;
+        //    var t2 = 0;
+        //    if( time_in_millis_1 > 0 ) {
+        //        // Change the milliseconds to 000, so that they mathch up
+        //        t1 = Math.floor(time_in_millis_1 / 1000);
+        //        t2 = Math.floor(time_in_millis_2 / 1000);
+        //    } else {
+        //        // Change the milliseconds to 000, so that they mathch up
+        //        t1 = Math.ceil(time_in_millis_1 / 1000);
+        //        t2 = Math.ceil(time_in_millis_2 / 1000);
+        //    }
+
+        //    return ( t1 == t2 )
+        //}
+
+        /**
+         * are_minutes_always_shown - if true, it will display minutes even when minutes are zero.
+         */
+        function milliseconds_to_time_str( millis, are_minutes_always_shown ) {
+            var seconds_str = "";
+            var minutes_str = "";
+
+            if( millis > 0 ) {
+                var minutes = Math.floor( millis / 1000 / 60 );
+                var seconds = Math.floor( millis / 1000 ) - (minutes * 60);
+                if( ( (seconds < 10) & (minutes > 0) ) | ( (seconds < 10) & are_minutes_always_shown) ) {
+                    seconds_str = "0" + seconds;
+                } else {
+                    seconds_str = "" + seconds;
+                }
+
+                if( minutes >= 1 | are_minutes_always_shown ) {
+                    minutes_str = minutes + ":";
+                } else {
+                    minutes_str = "";
+                }
+            } else {
+                // Negative time.
+
+                // Minus 1, to fix the off by 1 error. Without it, the program displays zero twice.
+                millis -= 1000;
+
+                // We use Math.ceil() to round up, because we are working with negative numbers.
+                // e.g. 
+                //     Math.floor( -0.1 ) = -1
+                //     Math.floor(  0.1 ) =  0
+                //     Math.ceil(  -0.1 ) =  0
+                //     Math.ceil(   0.1 ) =  1
+
+                var minutes = Math.ceil( millis / 1000 / 60 );
+                var seconds = Math.ceil( millis / 1000 ) - (minutes * 60);
+                if( ( (seconds > -10) & (minutes < 0) ) | ( (seconds > -10) & are_minutes_always_shown) ) {
+                    seconds_str = "0" + (seconds * -1);
+                } else {
+                    seconds_str = "" + (seconds * -1);
+                }
+
+                if( minutes <= -1 | are_minutes_always_shown ) {
+                    minutes_str = minutes + ":";
+                } else {
+                    minutes_str = "-";
+                }
+            }
+
+            var time_str = minutes_str + seconds_str;
+            return time_str;
+        }
+    </script>
+</body>
+</html>
+
