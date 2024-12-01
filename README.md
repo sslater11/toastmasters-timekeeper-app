@@ -18,6 +18,8 @@ It can time Table Topics, Icebreakers, Speeches, Evaluations, General Evaluation
 # Usage
 Open the page "toastmasters-timekeeper-app.html" on your phone's web browser.
 
+You can also click this link https://github.com/sslater11/toastmasters-timekeeper-app
+
 Rotate phone to landscape and pinchy zoom to resize the numbers to fit the screen to your liking.
 
 Choose Table Topics, Icebreaker, Speech, Evaluation or General Evaluator and 1-Minute Silence(for evaluators and judges).
@@ -37,4 +39,4 @@ MIT
 You can freely share or modify this for personal, business and corporate use :).
 
 # Version
-3.0 - 18/10/24
+3.1 - 01/12/24

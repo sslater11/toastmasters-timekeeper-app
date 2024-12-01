@@ -199,10 +199,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 
     <br>
     <div id="version_number" class="center-all">
-        <p class="reminder-text">Version 3.0 on 18/10/24</p><!-- CHANGE THIS IN THE README TOO -->
+        <p class="reminder-text">Version 3.1 on 01/12/24</p><!-- CHANGE THIS IN THE README TOO -->
     </div>
 
     <div id="github_link" class="center-all">
+        <p class="reminder-text">Online version: </p>
+        <p class="reminder-text">https://sslater11.github.io/toastmasters-timekeeper-app</p>
+    </div>
+
+    <div id="github_link2" class="center-all">
+        <p class="reminder-text">Code: </p>
         <p class="reminder-text">https://github.com/sslater11/toastmasters-timekeeper-app</p>
     </div>
 
@@ -557,6 +563,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             document.getElementById("list_of_timings").style.opacity = 1;
             document.getElementById("version_number").style.opacity  = 1;
             document.getElementById("github_link").style.opacity     = 1;
+            document.getElementById("github_link2").style.opacity    = 1;
 
             // Hide the Pause/Resume button
             show_only_start_stop_button();
@@ -584,6 +591,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             document.getElementById("list_of_timings").style.opacity = 0;
             document.getElementById("version_number").style.opacity  = 0;
             document.getElementById("github_link").style.opacity     = 0;
+            document.getElementById("github_link2").style.opacity    = 0;
         }
 
         function color_fade_to( start_colour, end_colour, percent ) {
