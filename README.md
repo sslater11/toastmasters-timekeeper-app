@@ -3,6 +3,8 @@ This is a simple countdown timer to be used at toastmasters, or for practice at 
 
 It can time Table Topics, Icebreakers, Speeches, Evaluations, General Evaluations and 1-Minute silence.
 
+Access the app here: https://sslater11.github.io/toastmasters-timekeeper-app
+
 ### It shows the green, amber and red card.
 
 <img src="images/start_card.png"> <img src="images/green_card.png"> <img src="images/amber_card.png"> <img src="images/red_card.png" >
@@ -18,7 +20,7 @@ It can time Table Topics, Icebreakers, Speeches, Evaluations, General Evaluation
 # Usage
 Open the page "toastmasters-timekeeper-app.html" on your phone's web browser.
 
-You can also click this link https://github.com/sslater11/toastmasters-timekeeper-app
+You can also click this link https://sslater11.github.io/toastmasters-timekeeper-app
 
 Rotate phone to landscape and pinchy zoom to resize the numbers to fit the screen to your liking.
 
